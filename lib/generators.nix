@@ -1,4 +1,4 @@
-{ lib }:
+{ lib, ... }:
 {
   toRON =
     let
@@ -41,7 +41,9 @@
           path = throw "Path is not supported in RON";
           set =
             if value ? __type then
-              if value.__type == "optional" then
+              if value.__type == "raw" then
+                toString value.value
+              else if value.__type == "optional" then
                 if value.value == null then "None" else "Some(${toRON' startIndent value.value})"
               else if value.__type == "char" then
                 if builtins.stringLength value.value == 1 then
@@ -79,8 +81,6 @@
                   },\n${indent startIndent})"
               else
                 throw "lib.cosmic.generators.toRON: set type ${value.__type} is not supported."
-            else if value ? __raw then
-              toString value.__raw
             else
               let
                 keys = builtins.attrNames (if value ? __name then value.value else value);

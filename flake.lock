@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "cosmic-ctl": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1734163342,
+        "narHash": "sha256-n589fcjcwSMXpFTBgOXom09I8Mi8FbN7tM8zI66ewiE=",
+        "owner": "cosmic-utils",
+        "repo": "cosmic-ctl",
+        "rev": "604f65f5000f14cdad520889927e9288220cfcf8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cosmic-utils",
+        "repo": "cosmic-ctl",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
@@ -58,6 +78,7 @@
     },
     "root": {
       "inputs": {
+        "cosmic-ctl": "cosmic-ctl",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "nixpkgs": "nixpkgs"
