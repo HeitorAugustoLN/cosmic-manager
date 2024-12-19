@@ -1,15 +1,5 @@
 { lib, ... }:
 {
-  cosmicEntryValue =
-    with lib.types;
-    nullOr (oneOf [
-      str
-      number
-      bool
-      (listOf anything)
-      (attrsOf anything)
-    ]);
-
   cosmicComponent = lib.types.submodule {
     options = {
       version = lib.mkOption {
@@ -37,4 +27,57 @@
       };
     };
   };
+
+  cosmicEntryValue =
+    with lib.types;
+    nullOr (oneOf [
+      str
+      number
+      bool
+      (listOf anything)
+      (attrsOf anything)
+    ]);
+
+  cosmicOption = lib.types.submodule {
+    options = {
+      __type = lib.mkOption {
+        type = lib.types.enum [ "option" ];
+        visible = false;
+      };
+      value = lib.mkOption {
+        type = lib.types.cosmicEntryValue;
+        visible = false;
+      };
+    };
+  };
+
+  cosmicRaw = lib.types.submodule {
+    options = {
+      __type = lib.mkOption {
+        type = lib.types.enum [ "raw" ];
+        visible = false;
+      };
+      value = lib.mkOption {
+        type = lib.types.str;
+        visible = false;
+      };
+    };
+  };
+
+  cosmicRawEnum =
+    enum:
+    lib.types.submodule {
+      options = {
+        __type = lib.mkOption {
+          type = lib.types.enum [ "raw" ];
+          visible = false;
+        };
+        value = lib.mkOption {
+          type = lib.types.enum enum;
+          visible = false;
+        };
+      };
+    };
+
+  hexColor = lib.types.strMatching "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$";
 }

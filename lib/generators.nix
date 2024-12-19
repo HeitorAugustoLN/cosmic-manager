@@ -59,6 +59,8 @@
                 let
                   keys = builtins.attrNames value.value;
                   count = builtins.length keys;
+
+                  isNumeric = string: builtins.match "^[0-9]+$" string != null;
                 in
                 if count == 0 then
                   "{}"
@@ -66,7 +68,9 @@
                   "{\n${
                     lib.concatImapStringsSep "\n" (
                       index: key:
-                      "${indent nextIndent}\"${key}\": ${toRON' nextIndent (builtins.getAttr key value.value)}${
+                      "${indent nextIndent}${
+                        if isNumeric key then key else lib.strings.escapeNixString key
+                      }: ${toRON' nextIndent (builtins.getAttr key value.value)}${
                         lib.optionalString (index != count) ","
                       }"
                     ) keys

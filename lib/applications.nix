@@ -51,14 +51,16 @@
                 ];
 
                 home.packages = lib.optionals (cfg.package != null) [ cfg.package ];
+              }
 
-                wayland.desktopManager.cosmic.configFile = {
-                  "${identifier}" = {
+              (lib.optionalAttrs hasSettings {
+                wayland.desktopManager.cosmic = {
+                  configFile."${identifier}" = {
                     entries = cfg.settings;
                     version = configurationVersion;
                   };
                 };
-              }
+              })
 
               (lib.optionalAttrs (args ? extraConfig) (
                 lib.cosmic.modules.applyExtraConfig { inherit cfg extraConfig; }

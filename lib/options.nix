@@ -1,5 +1,19 @@
 { lib, ... }:
 {
+  mkNullOrOption =
+    {
+      type,
+      default ? null,
+      ...
+    }@args:
+    lib.mkOption (
+      args
+      // {
+        type = lib.types.nullOr type;
+        inherit default;
+      }
+    );
+
   mkSettingsOption =
     {
       description,
