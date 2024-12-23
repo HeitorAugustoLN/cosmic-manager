@@ -127,7 +127,9 @@
                 "one of the following RON enum variants: ${lib.concatMapStringsSep ", " show variants}";
             descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
             functor = lib.defaultFunctor name // {
-              payload = { inherit variants; };
+              payload = {
+                inherit variants;
+              };
               type = payload: ronEnum' payload.variants;
               binOp = a: b: { variants = lib.unique (a.variants + b.variants); };
             };
@@ -159,7 +161,7 @@
         value = { };
       };
     };
-    merge = loc: defs: {
+    merge = _loc: defs: {
       __type = "map";
       value = builtins.foldl' (first: def: lib.recursiveUpdate first def.value.value) { } defs;
     };
@@ -200,14 +202,14 @@
           functor = lib.defaultFunctor name // {
             wrapped = elemType;
           };
-          getSubModules = elemType.getSubModules;
+          inherit (elemType) getSubModules;
           getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "<name>" ]);
           merge =
             loc: defs:
             let
               pushPositions = map (
                 def:
-                builtins.mapAttrs (n: v: {
+                builtins.mapAttrs (_n: v: {
                   inherit (def) file;
                   value = v;
                 }) def.value.value
@@ -215,9 +217,9 @@
             in
             {
               __type = "map";
-              value = builtins.mapAttrs (n: v: v.value) (
-                lib.filterAttrs (n: v: v ? value) (
-                  lib.zipAttrsWith (
+              value = builtins.mapAttrs (_n: v: v.value) (
+                lib.filterAttrs (_n: v: v ? value) (
+                  builtins.zipAttrsWith (
                     name: defs: (lib.mergeDefinitions (loc ++ [ name ]) elemType defs).optionalValue
                   ) (pushPositions defs)
                 )
@@ -298,14 +300,14 @@
           functor = lib.defaultFunctor name // {
             wrapped = elemType;
           };
-          getSubModules = elemType.getSubModules;
+          inherit (elemType) getSubModules;
           getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "<name>" ]);
           merge =
             loc: defs:
             let
               pushPositions = map (
                 def:
-                builtins.mapAttrs (n: v: {
+                builtins.mapAttrs (_n: v: {
                   inherit (def) file;
                   value = v;
                 }) def.value.value
@@ -330,9 +332,9 @@
                     else
                       first.value.__name
                   ) (builtins.head defs) (builtins.tail defs);
-              value = builtins.mapAttrs (n: v: v.value) (
-                lib.filterAttrs (n: v: v ? value) (
-                  lib.zipAttrsWith (
+              value = builtins.mapAttrs (_n: v: v.value) (
+                lib.filterAttrs (_n: v: v ? value) (
+                  builtins.zipAttrsWith (
                     name: defs: (lib.mergeDefinitions (loc ++ [ name ]) elemType defs).optionalValue
                   ) (pushPositions defs)
                 )
@@ -395,7 +397,7 @@
           functor = lib.defaultFunctor name // {
             wrapped = elemType;
           };
-          getSubModules = elemType.getSubModules;
+          inherit (elemType) getSubModules;
           getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "<name>" ]);
           merge = loc: defs: {
             __type = "optional";
@@ -436,7 +438,7 @@
         value = [ ];
       };
     };
-    merge = loc: defs: {
+    merge = _loc: defs: {
       __type = "tuple";
       value = builtins.concatLists (map (x: x.value.value) defs);
     };
@@ -481,7 +483,9 @@
                 } with a value";
             descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
             functor = lib.defaultFunctor name // {
-              payload = { inherit variants; };
+              payload = {
+                inherit variants;
+              };
               type = payload: ronTupleEnum' payload.variants;
               binOp = a: b: { variants = lib.unique (a.variants + b.variants); };
             };
@@ -533,14 +537,16 @@
                 } value";
             descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
             functor = lib.defaultFunctor name // {
-              payload = { inherit elemType variants; };
+              payload = {
+                inherit elemType variants;
+              };
               type = payload: ronTupleEnumOf' payload.elemType payload.variants;
               binOp = a: b: {
                 variants = lib.unique (a.variants + b.variants);
                 elemType = a.elemType.typeMerge b.elemType.functor;
               };
             };
-            getSubModules = elemType.getSubModules;
+            inherit (elemType) getSubModules;
             getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "*" ]);
             merge = loc: defs: {
               __type = "enum";
@@ -622,7 +628,7 @@
           functor = lib.defaultFunctor name // {
             wrapped = elemType;
           };
-          getSubModules = elemType.getSubModules;
+          inherit (elemType) getSubModules;
           getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "*" ]);
           merge = loc: defs: {
             __type = "tuple";

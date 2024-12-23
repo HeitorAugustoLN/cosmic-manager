@@ -17,6 +17,7 @@
       in
       [
         ./files.nix
+        ./panels.nix
       ]
       ++ lib.foldlAttrs (
         prev: name: type:
