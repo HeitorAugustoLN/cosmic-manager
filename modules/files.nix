@@ -15,8 +15,8 @@
           entries = {
             autotile = true;
             autotile_behavior = {
-              __type = "raw";
-              value = "PerWorkspace";
+              __type = "enum";
+              variant = "PerWorkspace";
             };
             xkb_config = {
               rules = "";
@@ -110,8 +110,9 @@
                 value = [
                   "Virtual-1"
                   {
-                    __type = "raw";
-                    value = ''Path("/usr/share/backgrounds/cosmic/webb-inspired-wallpaper-system76.jpg")'';
+                    __type = "enum";
+                    variant = "Path";
+                    value = [ "/usr/share/backgrounds/cosmic/webb-inspired-wallpaper-system76.jpg" ];
                   }
                 ];
               }

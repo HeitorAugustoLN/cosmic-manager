@@ -13,14 +13,14 @@ lib.cosmic.applications.mkCosmicApplication {
 
   settingsOptions = {
     app_theme = mkNullOrOption {
-      type = lib.types.rawRonEnum [
+      type = lib.types.ronEnum [
         "Dark"
         "Light"
         "System"
       ];
       example = {
-        __type = "raw";
-        value = "Dark";
+        __type = "enum";
+        variant = "Dark";
       };
       description = ''
         Controls the theme of the terminal.
@@ -143,8 +143,8 @@ lib.cosmic.applications.mkCosmicApplication {
 
   settingsExample = {
     app_theme = {
-      __type = "raw";
-      value = "Dark";
+      __type = "enum";
+      variant = "Dark";
     };
     bold_font_weight = 700;
     dim_font_weight = 300;

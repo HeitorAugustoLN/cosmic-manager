@@ -55,6 +55,28 @@
                   "'${value.value}'"
                 else
                   throw "lib.cosmic.generators.toRON: char type must be a single character."
+              else if value.__type == "enum" then
+                if value ? variant then
+                  if value ? value then
+                    if builtins.isList value.value then
+                      let
+                        count = builtins.length value.value;
+                      in
+                      if count == 0 then
+                        "${value.variant}()"
+                      else
+                        "${value.variant}(\n${
+                          lib.concatImapStringsSep "\n" (
+                            index: element:
+                            "${indent nextIndent}${toRON' nextIndent element}${lib.optionalString (index != count) ","}"
+                          ) value.value
+                        },\n${indent startIndent})"
+                    else
+                      throw "lib.cosmic.generators.toRON: enum type must have a list of values."
+                  else
+                    toString value.variant
+                else
+                  throw "lib.cosmic.generators.toRON: enum type must have a variant."
               else if value.__type == "map" then
                 let
                   keys = builtins.attrNames value.value;
