@@ -47,9 +47,12 @@
             };
             map = {
               __type = "map";
-              value = {
-                key = "value";
-              };
+              value = [
+                {
+                  key = "key";
+                  value = "value";
+                }
+              ];
             };
             tuple = {
               __type = "tuple";

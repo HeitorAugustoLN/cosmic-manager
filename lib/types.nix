@@ -152,18 +152,27 @@
           "value"
         ] == keys
       && value.__type == "map"
-      && builtins.isAttrs value.value;
+      && builtins.isList value.value
+      && builtins.all (
+        entry:
+        builtins.isAttrs entry
+        &&
+          builtins.attrNames entry == [
+            "key"
+            "value"
+          ]
+      ) value.value;
     description = "RON map";
     descriptionClass = "noun";
     emptyValue = {
       value = {
         __type = "map";
-        value = { };
+        value = [ ];
       };
     };
     merge = _loc: defs: {
       __type = "map";
-      value = builtins.foldl' (first: def: lib.recursiveUpdate first def.value.value) { } defs;
+      value = builtins.concatLists (map (def: def.value.value) defs);
     };
     name = "ronMap";
   };
@@ -188,7 +197,16 @@
                 "value"
               ] == keys
             && value.__type == "map"
-            && builtins.isAttrs value.value;
+            && builtins.isList value.value
+            && builtins.all (
+              entry:
+              builtins.isAttrs entry
+              &&
+                builtins.attrNames entry == [
+                  "key"
+                  "value"
+                ]
+            ) value.value;
           description = "RON map of ${
             lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
           }";
@@ -196,7 +214,7 @@
           emptyValue = {
             value = {
               __type = "map";
-              value = { };
+              value = [ ];
             };
           };
           functor = lib.defaultFunctor name // {
@@ -204,27 +222,24 @@
           };
           inherit (elemType) getSubModules;
           getSubOptions = prefix: elemType.getSubOptions (prefix ++ [ "<name>" ]);
-          merge =
-            loc: defs:
-            let
-              pushPositions = map (
+          merge = loc: defs: {
+            __type = "map";
+            value = builtins.concatLists (
+              map (
                 def:
-                builtins.mapAttrs (_n: v: {
-                  inherit (def) file;
-                  value = v;
+                map (entry: {
+                  inherit (entry) key;
+                  value =
+                    (lib.mergeDefinitions (loc ++ [ "<entry>" ]) elemType [
+                      {
+                        inherit (def) file;
+                        inherit (entry) value;
+                      }
+                    ]).mergedValue;
                 }) def.value.value
-              );
-            in
-            {
-              __type = "map";
-              value = builtins.mapAttrs (_n: v: v.value) (
-                lib.filterAttrs (_n: v: v ? value) (
-                  builtins.zipAttrsWith (
-                    name: defs: (lib.mergeDefinitions (loc ++ [ name ]) elemType defs).optionalValue
-                  ) (pushPositions defs)
-                )
-              );
-            };
+              ) defs
+            );
+          };
           inherit name;
           nestedTypes.elemType = elemType;
           substSubModules = m: ronMapOf' (elemType.substSubModules m);

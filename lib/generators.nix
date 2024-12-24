@@ -78,25 +78,40 @@
                 else
                   throw "lib.cosmic.generators.toRON: enum type must have a variant."
               else if value.__type == "map" then
-                let
-                  keys = builtins.attrNames value.value;
-                  count = builtins.length keys;
-
-                  isNumeric = string: builtins.match "^[0-9]+$" string != null;
-                in
-                if count == 0 then
-                  "{}"
+                if value ? value then
+                  if builtins.isList value.value then
+                    if builtins.all (x: builtins.isAttrs x) value.value then
+                      let
+                        count = builtins.length value.value;
+                      in
+                      if count == 0 then
+                        "{}"
+                      else
+                        "{\n${
+                          lib.concatImapStringsSep "\n" (
+                            index: entry:
+                            let
+                              keys = builtins.attrNames entry;
+                            in
+                            if
+                              [
+                                "key"
+                                "value"
+                              ] == keys
+                            then
+                              "${indent nextIndent}${toRON' nextIndent entry.key}: ${toRON' nextIndent entry.value}${
+                                lib.optionalString (index != count) ","
+                              }"
+                            else
+                              throw "lib.cosmic.generators.toRON: map type entry must have only 'key' and 'value' attributes."
+                          ) value.value
+                        },\n${indent startIndent}}"
+                    else
+                      throw "lib.cosmic.generators.toRON: map type value must be a list of attribute sets."
+                  else
+                    throw "lib.cosmic.generators.toRON: map type value must be a list."
                 else
-                  "{\n${
-                    lib.concatImapStringsSep "\n" (
-                      index: key:
-                      "${indent nextIndent}${
-                        if isNumeric key then key else lib.strings.escapeNixString key
-                      }: ${toRON' nextIndent (builtins.getAttr key value.value)}${
-                        lib.optionalString (index != count) ","
-                      }"
-                    ) keys
-                  },\n${indent startIndent}}"
+                  throw "lib.cosmic.generators.toRON: map type must have a value."
               else if value.__type == "tuple" then
                 let
                   count = builtins.length value.value;

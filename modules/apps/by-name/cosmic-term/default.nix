@@ -458,41 +458,29 @@ lib.cosmic.applications.mkCosmicApplication {
         };
         profiles = {
           __type = "map";
-          value = builtins.listToAttrs (
-            lib.imap0 (index: profile: {
-              name = toString index;
-              value = builtins.removeAttrs profile [ "is_default" ];
-            }) cfg.profiles
-          );
+          value = lib.imap0 (index: profile: {
+            key = index;
+            value = builtins.removeAttrs profile [ "is_default" ];
+          }) cfg.profiles;
         };
       })
 
-      (lib.optionalAttrs (cfg.colorSchemes != null) (
-        let
-          colorSchemes = builtins.filter (colorscheme: colorscheme.mode == "dark") cfg.colorSchemes;
-          colorSchemesLight = builtins.filter (colorscheme: colorscheme.mode == "light") cfg.colorSchemes;
-        in
-        {
-          color_schemes_dark = {
-            __type = "map";
-            value = builtins.listToAttrs (
-              lib.imap0 (index: colorscheme: {
-                name = toString index;
-                value = builtins.removeAttrs colorscheme [ "mode" ];
-              }) colorSchemes
-            );
-          };
-          color_schemes_light = {
-            __type = "map";
-            value = builtins.listToAttrs (
-              lib.imap0 (index: colorscheme: {
-                name = toString index;
-                value = builtins.removeAttrs colorscheme [ "mode" ];
-              }) colorSchemesLight
-            );
-          };
-        }
-      ))
+      (lib.optionalAttrs (cfg.colorSchemes != null) {
+        color_schemes_dark = {
+          __type = "map";
+          value = lib.imap0 (index: colorscheme: {
+            key = index;
+            value = builtins.removeAttrs colorscheme [ "mode" ];
+          }) (builtins.filter (colorscheme: colorscheme.mode == "dark") cfg.colorSchemes);
+        };
+        color_schemes_light = {
+          __type = "map";
+          value = lib.imap0 (index: colorscheme: {
+            key = index;
+            value = builtins.removeAttrs colorscheme [ "mode" ];
+          }) (builtins.filter (colorscheme: colorscheme.mode == "light") cfg.colorSchemes);
+        };
+      })
     ];
   };
 }
