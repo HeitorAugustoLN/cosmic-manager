@@ -17,4 +17,11 @@
         );
     in
     cleanNullsExceptOptional';
+
+  capitalizeWord =
+    word:
+    with lib.strings;
+    concatImapStrings (index: char: if index == 1 then toUpper char else toLower char) (
+      stringToCharacters word
+    );
 }

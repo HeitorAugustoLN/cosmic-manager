@@ -18,6 +18,7 @@
       [
         ./files.nix
         ./panels.nix
+        ./shortcuts.nix
       ]
       ++ lib.foldlAttrs (
         prev: name: type:
