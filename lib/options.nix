@@ -61,11 +61,20 @@
                 1
               ];
             };
-            named_struct = {
+            namedStruct = {
               __name = "NamedStruct";
               value = {
                 key = "value";
               };
+            };
+            enum = {
+              __type = "enum";
+              variant = "ActiveWorkspace";
+            };
+            tupleEnum = {
+              __type = "enum";
+              variant = "TupleEnum";
+              value = [ "foobar" ];
             };
           }
         else

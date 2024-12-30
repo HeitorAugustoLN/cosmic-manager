@@ -13,6 +13,7 @@
       ;
     modules =
       let
+        appletsByName = ./applets/by-name;
         appsByName = ./apps/by-name;
       in
       [
@@ -23,7 +24,11 @@
       ++ lib.foldlAttrs (
         prev: name: type:
         prev ++ lib.optional (type == "directory") (appsByName + "/${name}")
-      ) [ ] (builtins.readDir appsByName);
+      ) [ ] (builtins.readDir appsByName)
+      ++ lib.foldlAttrs (
+        prev: name: type:
+        prev ++ lib.optional (type == "directory") (appletsByName + "/${name}")
+      ) [ ] (builtins.readDir appletsByName);
   };
 
   options.wayland.desktopManager.cosmic.enable =

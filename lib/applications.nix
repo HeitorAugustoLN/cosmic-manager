@@ -55,7 +55,7 @@
 
               (lib.optionalAttrs hasSettings {
                 wayland.desktopManager.cosmic = {
-                  configFile."${identifier}" = {
+                  configFile.${identifier} = {
                     entries = cfg.settings;
                     version = configurationVersion;
                   };

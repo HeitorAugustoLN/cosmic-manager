@@ -1,5 +1,6 @@
 { lib, ... }:
 {
+  applets = import ./applets.nix { inherit lib; };
   applications = import ./applications.nix { inherit lib; };
   generators = import ./generators.nix { inherit lib; };
   modules = import ./modules.nix { inherit lib; };
