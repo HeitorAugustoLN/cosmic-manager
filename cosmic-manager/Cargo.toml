@@ -7,4 +7,5 @@ edition = "2021"
 clap = { version = "4.5.26", features = ["derive"] }
 etcetera = "0.8.0"
 fancy-regex = "0.14.0"
+libcosmic = { git = "https://github.com/pop-os/libcosmic.git", default-features = false }
 walkdir = "2.5.0"

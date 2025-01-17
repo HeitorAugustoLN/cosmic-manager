@@ -5,7 +5,7 @@
 }:
 rustPlatform.buildRustPackage {
   pname = "cosmic-manager";
-  version = "unstable-14-01-2025";
+  version = "unstable-17-01-2025";
   src = lib.fileset.toSource {
     root = ./.;
     fileset = lib.fileset.unions [
@@ -15,7 +15,8 @@ rustPlatform.buildRustPackage {
     ];
   };
 
-  cargoHash = "sha256-+YXxaunQIwkdDd1xyqiN4WnDPFWuy0/IiCpYoFpglic=";
+  useFetchCargoVendor = true;
+  cargoHash = "sha256-lvuVPidbCfSqazelzxhsBrJdXGdCpw/YOL5dijy5ORI=";
 
   meta = {
     description = "cosmic-manager command-line interface";
