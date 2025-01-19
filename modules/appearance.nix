@@ -1193,191 +1193,178 @@
             };
         in
         {
-          dark = lib.mkOption {
-            type = themeSubmodule;
-            default = { };
-            example = {
-              active_hint = 3;
-            };
-            description = ''
-              The dark theme to build for COSMIC desktop and applications.
-            '';
-          };
+          dark = defaultNullOpts.mkNullable themeSubmodule { active_hint = 3; } ''
+            The dark theme to build for COSMIC desktop and applications.
+          '';
 
           default = defaultNullOpts.mkEnum [ "dark" "light" ] "dark" ''
             The default theme to use for COSMIC desktop and applications.
           '';
 
-          light = lib.mkOption {
-            type = themeSubmodule;
-            default = { };
-            example = {
-              active_hint = 3;
-            };
-            description = ''
-              The light theme to build for COSMIC desktop and applications.
-            '';
-          };
+          light = defaultNullOpts.mkNullable themeSubmodule { active_hint = 3; } ''
+            The light theme to build for COSMIC desktop and applications.
+          '';
         };
 
-      toolkit = lib.mkOption {
-        type = lib.types.submodule {
-          freeformType = with lib.types; attrsOf cosmicEntryValue;
-          options =
-            let
-              fontSubmodule = lib.types.submodule {
-                freeformType = with lib.types; attrsOf cosmicEntryValue;
-                options = {
-                  family = lib.mkOption {
-                    type = with lib.types; maybeRonRaw str;
-                    example = "Inter";
-                    description = ''
-                      The font family to use.
-                    '';
-                  };
+      toolkit =
+        let
+          toolkitSubmodule = lib.types.submodule {
+            freeformType = with lib.types; attrsOf cosmicEntryValue;
+            options =
+              let
+                fontSubmodule = lib.types.submodule {
+                  freeformType = with lib.types; attrsOf cosmicEntryValue;
+                  options = {
+                    family = lib.mkOption {
+                      type = with lib.types; maybeRonRaw str;
+                      example = "Inter";
+                      description = ''
+                        The font family to use.
+                      '';
+                    };
 
-                  stretch = lib.mkOption {
-                    type =
-                      with lib.types;
-                      maybeRonRaw (ronEnum [
-                        "UltraCondensed"
-                        "ExtraCondensed"
-                        "Condensed"
-                        "SemiCondensed"
-                        "Normal"
-                        "SemiExpanded"
-                        "Expanded"
-                        "ExtraExpanded"
-                        "UltraExpanded"
-                      ]);
-                    example = mkRonExpression 0 {
-                      __type = "enum";
-                      variant = "Normal";
-                    } null;
-                    description = ''
-                      The font stretch to use.
-                    '';
-                  };
+                    stretch = lib.mkOption {
+                      type =
+                        with lib.types;
+                        maybeRonRaw (ronEnum [
+                          "UltraCondensed"
+                          "ExtraCondensed"
+                          "Condensed"
+                          "SemiCondensed"
+                          "Normal"
+                          "SemiExpanded"
+                          "Expanded"
+                          "ExtraExpanded"
+                          "UltraExpanded"
+                        ]);
+                      example = mkRonExpression 0 {
+                        __type = "enum";
+                        variant = "Normal";
+                      } null;
+                      description = ''
+                        The font stretch to use.
+                      '';
+                    };
 
-                  style = lib.mkOption {
-                    type =
-                      with lib.types;
-                      maybeRonRaw (ronEnum [
-                        "Normal"
-                        "Italic"
-                        "Oblique"
-                      ]);
-                    example = mkRonExpression 0 {
-                      __type = "enum";
-                      variant = "Normal";
-                    } null;
-                    description = ''
-                      The font style to use.
-                    '';
-                  };
+                    style = lib.mkOption {
+                      type =
+                        with lib.types;
+                        maybeRonRaw (ronEnum [
+                          "Normal"
+                          "Italic"
+                          "Oblique"
+                        ]);
+                      example = mkRonExpression 0 {
+                        __type = "enum";
+                        variant = "Normal";
+                      } null;
+                      description = ''
+                        The font style to use.
+                      '';
+                    };
 
-                  weight = lib.mkOption {
-                    type =
-                      with lib.types;
-                      maybeRonRaw (ronEnum [
-                        "Thin"
-                        "ExtraLight"
-                        "Light"
-                        "Normal"
-                        "Medium"
-                        "Semibold"
-                        "Bold"
-                        "ExtraBold"
-                        "Black"
-                      ]);
-                    example = mkRonExpression 0 {
-                      __type = "enum";
-                      variant = "Normal";
-                    } null;
-                    description = ''
-                      The font weight to use.
-                    '';
+                    weight = lib.mkOption {
+                      type =
+                        with lib.types;
+                        maybeRonRaw (ronEnum [
+                          "Thin"
+                          "ExtraLight"
+                          "Light"
+                          "Normal"
+                          "Medium"
+                          "Semibold"
+                          "Bold"
+                          "ExtraBold"
+                          "Black"
+                        ]);
+                      example = mkRonExpression 0 {
+                        __type = "enum";
+                        variant = "Normal";
+                      } null;
+                      description = ''
+                        The font weight to use.
+                      '';
+                    };
                   };
                 };
+              in
+              {
+                apply_theme_global = defaultNullOpts.mkBool false ''
+                  Whether to apply the theme to other toolkits (GTK, etc.).
+                '';
+
+                header_size = defaultNullOpts.mkRonEnum [ "Compact" "Spacious" "Standard" ] "Standard" ''
+                  The header size for COSMIC desktop and applications.
+                '';
+
+                icon_theme = defaultNullOpts.mkStr "Cosmic" ''
+                  The icon theme to use for COSMIC desktop and applications.
+                '';
+
+                interface_density = defaultNullOpts.mkRonEnum [ "Compact" "Spacious" "Standard" ] "Standard" ''
+                  The interface density to use for COSMIC desktop and applications.
+                '';
+
+                interface_font =
+                  defaultNullOpts.mkNullable fontSubmodule
+                    {
+                      family = "Inter";
+                      stretch = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                      style = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                      weight = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                    }
+                    ''
+                      The interface font to use for COSMIC desktop and applications.
+                    '';
+
+                monospace_font =
+                  defaultNullOpts.mkNullable fontSubmodule
+                    {
+                      family = "JetBrains Mono";
+                      stretch = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                      style = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                      weight = {
+                        __type = "enum";
+                        variant = "Normal";
+                      };
+                    }
+                    ''
+                      The monospace font to use for COSMIC desktop and applications.
+                    '';
+
+                show_maximize = defaultNullOpts.mkBool true ''
+                  Whether to show the maximize button in the window title bar.
+                '';
+
+                show_minimize = defaultNullOpts.mkBool true ''
+                  Whether to show the minimize button in the window title bar.
+                '';
               };
-            in
-            {
-              apply_theme_global = defaultNullOpts.mkBool false ''
-                Whether to apply the theme to other toolkits (GTK, etc.).
-              '';
-
-              header_size = defaultNullOpts.mkRonEnum [ "Compact" "Spacious" "Standard" ] "Standard" ''
-                The header size for COSMIC desktop and applications.
-              '';
-
-              icon_theme = defaultNullOpts.mkStr "Cosmic" ''
-                The icon theme to use for COSMIC desktop and applications.
-              '';
-
-              interface_density = defaultNullOpts.mkRonEnum [ "Compact" "Spacious" "Standard" ] "Standard" ''
-                The interface density to use for COSMIC desktop and applications.
-              '';
-
-              interface_font =
-                defaultNullOpts.mkNullable fontSubmodule
-                  {
-                    family = "Inter";
-                    stretch = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                    style = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                    weight = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                  }
-                  ''
-                    The interface font to use for COSMIC desktop and applications.
-                  '';
-
-              monospace_font =
-                defaultNullOpts.mkNullable fontSubmodule
-                  {
-                    family = "JetBrains Mono";
-                    stretch = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                    style = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                    weight = {
-                      __type = "enum";
-                      variant = "Normal";
-                    };
-                  }
-                  ''
-                    The monospace font to use for COSMIC desktop and applications.
-                  '';
-
-              show_maximize = defaultNullOpts.mkBool true ''
-                Whether to show the maximize button in the window title bar.
-              '';
-
-              show_minimize = defaultNullOpts.mkBool true ''
-                Whether to show the minimize button in the window title bar.
-              '';
-            };
-        };
-        default = { };
-        example = {
-          apply_theme_global = false;
-          icon_theme = "Cosmic";
-        };
-        description = ''
-          The toolkit configuration for COSMIC desktop and applications.
-        '';
-      };
+          };
+        in
+        defaultNullOpts.mkNullable toolkitSubmodule
+          {
+            apply_theme_global = false;
+            icon_theme = "Cosmic";
+          }
+          ''
+            The toolkit configuration for COSMIC desktop and applications.
+          '';
     };
 
   config =
@@ -1393,22 +1380,22 @@
 
           needsBuild =
             builtins.any (panel: panel.background != null && panel.background.variant == "Color") cfg.panels
-            || cfg.appearance.theme.dark != { }
-            || cfg.appearance.theme.light != { };
+            || cfg.appearance.theme.dark != null
+            || cfg.appearance.theme.light != null;
         in
         lib.mkIf needsBuild (
           lib.hm.dag.entryAfter [ "configureCosmic" ] "run ${lib.getExe cosmic-manager-cli} build-theme"
         );
 
       wayland.desktopManager.cosmic.configFile = lib.mkMerge [
-        (lib.mkIf (cfg.appearance.theme.dark != { }) {
+        (lib.mkIf (cfg.appearance.theme.dark != null) {
           "com.system76.CosmicTheme.Dark.Builder" = {
             entries = cfg.appearance.theme.dark;
             inherit version;
           };
         })
 
-        (lib.mkIf (cfg.appearance.theme.light != { }) {
+        (lib.mkIf (cfg.appearance.theme.light != null) {
           "com.system76.CosmicTheme.Light.Builder" = {
             entries = cfg.appearance.theme.light;
             inherit version;
@@ -1422,7 +1409,7 @@
           };
         })
 
-        (lib.mkIf (cfg.appearance.toolkit != { }) {
+        (lib.mkIf (cfg.appearance.toolkit != null) {
           "com.system76.CosmicTk" = {
             entries = cfg.appearance.toolkit;
             inherit version;

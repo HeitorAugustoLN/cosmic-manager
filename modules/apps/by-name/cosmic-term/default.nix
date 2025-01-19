@@ -170,9 +170,8 @@ lib.cosmic.applications.mkCosmicApplication {
           };
         };
       in
-      lib.mkOption {
-        type = with lib.types; listOf profileSubmodule;
-        default = [ ];
+      defaultNullOpts.mkNullable' {
+        type = lib.types.listOf profileSubmodule;
         example = [
           {
             command = "bash";
@@ -344,9 +343,8 @@ lib.cosmic.applications.mkCosmicApplication {
           };
         };
       in
-      lib.mkOption {
+      defaultNullOpts.mkNullable' {
         type = lib.types.listOf colorSchemeSubmodule;
-        default = [ ];
         example = [
           {
             mode = "dark";
@@ -395,7 +393,7 @@ lib.cosmic.applications.mkCosmicApplication {
 
   extraConfig = cfg: {
     wayland.desktopManager.cosmic.configFile."com.system76.CosmicTerm".entries = lib.mkMerge [
-      (lib.optionalAttrs (cfg.profiles != [ ]) {
+      (lib.mkIf (cfg.profiles != null) {
         default_profile = {
           __type = "optional";
           value = lib.lists.findFirstIndex (profile: profile.is_default) null cfg.profiles;
@@ -409,7 +407,7 @@ lib.cosmic.applications.mkCosmicApplication {
         };
       })
 
-      (lib.optionalAttrs (cfg.colorSchemes != [ ]) {
+      (lib.mkIf (cfg.colorSchemes != null) {
         color_schemes_dark = {
           __type = "map";
           value = lib.imap0 (index: colorscheme: {

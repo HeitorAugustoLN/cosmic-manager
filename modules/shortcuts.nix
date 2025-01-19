@@ -1,17 +1,9 @@
 { config, lib, ... }:
-let
-  cfg = config.wayland.desktopManager.cosmic;
-
-  inherit (lib.cosmic)
-    cleanNullsExceptOptional
-    defaultNullOpts
-    mkRonExpression
-    rustToNixType
-    ;
-in
 {
   options.wayland.desktopManager.cosmic.shortcuts =
     let
+      inherit (lib.cosmic) defaultNullOpts;
+
       shortcutSubmodule =
         let
           generatedActions = lib.importJSON ../generated/actions-for-shortcuts.json;
@@ -59,6 +51,9 @@ in
                             actionDependencies = generatedActions.Dependencies;
 
                             elemType =
+                              let
+                                inherit (lib.cosmic) rustToNixType;
+                              in
                               if builtins.hasAttr type actionDependencies then
                                 ronEnum (map (action: action.name) actionDependencies.${type})
                               else
@@ -76,11 +71,15 @@ in
                         )
                   )
                 );
-              example = mkRonExpression 0 {
-                __type = "enum";
-                variant = "Spawn";
-                value = [ "firefox" ];
-              } null;
+              example =
+                let
+                  inherit (lib.cosmic) mkRonExpression;
+                in
+                mkRonExpression 0 {
+                  __type = "enum";
+                  variant = "Spawn";
+                  value = [ "firefox" ];
+                } null;
               description = ''
                 The action triggered by the shortcut.
                 Actions can include running a command, moving windows, system actions, and more.
@@ -89,72 +88,67 @@ in
           };
         };
     in
-    lib.mkOption {
-      type = lib.types.listOf shortcutSubmodule;
-      default = [ ];
-      example =
-        let
-          shortcuts = [
-            {
-              description = "Open Firefox";
-              key = "Super+B";
-              action = {
+    defaultNullOpts.mkNullable (lib.types.listOf shortcutSubmodule)
+      [
+        {
+          description = "Open Firefox";
+          key = "Super+B";
+          action = {
+            __type = "enum";
+            variant = "Spawn";
+            value = [ "firefox" ];
+          };
+        }
+        {
+          key = "Super+Q";
+          action = {
+            __type = "enum";
+            variant = "Close";
+          };
+        }
+        {
+          key = "Super+M";
+          action = {
+            __type = "enum";
+            variant = "Disable";
+          };
+        }
+        {
+          key = "XF86MonBrightnessDown";
+          action = {
+            __type = "enum";
+            variant = "System";
+            value = [
+              {
                 __type = "enum";
-                variant = "Spawn";
-                value = [ "firefox" ];
-              };
-            }
-            {
-              key = "Super+Q";
-              action = {
+                variant = "BrightnessDown";
+              }
+            ];
+          };
+        }
+        {
+          key = "Super";
+          action = {
+            __type = "enum";
+            variant = "System";
+            value = [
+              {
                 __type = "enum";
-                variant = "Close";
-              };
-            }
-            {
-              key = "Super+M";
-              action = {
-                __type = "enum";
-                variant = "Disable";
-              };
-            }
-            {
-              key = "XF86MonBrightnessDown";
-              action = {
-                __type = "enum";
-                variant = "System";
-                value = [
-                  {
-                    __type = "enum";
-                    variant = "BrightnessDown";
-                  }
-                ];
-              };
-            }
-            {
-              key = "Super";
-              action = {
-                __type = "enum";
-                variant = "System";
-                value = [
-                  {
-                    __type = "enum";
-                    variant = "Launcher";
-                  }
-                ];
-              };
-            }
-          ];
-        in
-        mkRonExpression 0 shortcuts null;
-      description = ''
+                variant = "Launcher";
+              }
+            ];
+          };
+        }
+      ]
+      ''
         Defines a list of custom shortcuts for the COSMIC desktop environment.
         Each shortcut specifies a key combination, the action to be performed, and optionally a description for a custom shortcut.
       '';
-    };
 
   config =
     let
+      cfg = config.wayland.desktopManager.cosmic;
+
       parseShortcuts =
         key:
         let
@@ -190,17 +184,21 @@ in
           }) (lib.unique (if builtins.all isModifier parts then parts else init));
         };
     in
-    lib.mkIf (cfg.shortcuts != [ ]) {
+    lib.mkIf (cfg.shortcuts != null) {
       wayland.desktopManager.cosmic.configFile."com.system76.CosmicSettings.Shortcuts" = {
         entries.custom = {
           __type = "map";
           value = lib.pipe cfg.shortcuts [
             (map (shortcut: {
-              key = lib.pipe shortcut.key [
-                parseShortcuts
-                (parsed: parsed // { inherit (shortcut) description; })
-                cleanNullsExceptOptional
-              ];
+              key =
+                let
+                  inherit (lib.cosmic) cleanNullsExceptOptional;
+                in
+                lib.pipe shortcut.key [
+                  parseShortcuts
+                  (parsed: parsed // { inherit (shortcut) description; })
+                  cleanNullsExceptOptional
+                ];
               value = shortcut.action;
             }))
           ];

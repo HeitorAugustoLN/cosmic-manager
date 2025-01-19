@@ -1,10 +1,9 @@
 { config, lib, ... }:
-let
-  inherit (lib.cosmic) defaultNullOpts mkRonExpression;
-in
 {
   options.wayland.desktopManager.cosmic.panels =
     let
+      inherit (lib.cosmic) defaultNullOpts;
+
       panelSubmodule = lib.types.submodule {
         freeformType = with lib.types; attrsOf cosmicEntryValue;
         options = {
@@ -177,78 +176,71 @@ in
         };
       };
     in
-    lib.mkOption {
-      type = lib.types.listOf panelSubmodule;
-      default = [ ];
-      example =
-        let
-          panels = [
-            {
-              anchor = {
-                __type = "enum";
-                variant = "Bottom";
-              };
-              anchor_gap = true;
-              autohide = {
-                __type = "optional";
-                value = {
-                  handle_size = 4;
-                  transition_time = 200;
-                  wait_time = 1000;
-                };
-              };
-              background = {
-                __type = "enum";
-                variant = "Dark";
-              };
-              expand_to_edges = true;
-              name = "Panel";
-              opacity = 1.0;
-              output = {
-                __type = "enum";
-                variant = "Name";
-                value = [ "Virtual-1" ];
-              };
-              plugins_center = {
-                __type = "optional";
-                value = [ "com.system76.CosmicAppletTime" ];
-              };
-              plugins_wings = {
-                __type = "optional";
-                value = {
-                  __type = "tuple";
-                  value = [
-                    [
-                      "com.system76.CosmicPanelWorkspacesButton"
-                      "com.system76.CosmicPanelAppButton"
-                      "com.system76.CosmicAppletWorkspaces"
-                    ]
-                    [
-                      "com.system76.CosmicAppletInputSources"
-                      "com.system76.CosmicAppletStatusArea"
-                      "com.system76.CosmicAppletTiling"
-                      "com.system76.CosmicAppletAudio"
-                      "com.system76.CosmicAppletNetwork"
-                      "com.system76.CosmicAppletBattery"
-                      "com.system76.CosmicAppletNotifications"
-                      "com.system76.CosmicAppletBluetooth"
-                      "com.system76.CosmicAppletPower"
-                    ]
-                  ];
-                };
-              };
-              size = {
-                __type = "enum";
-                variant = "M";
-              };
-            }
-          ];
-        in
-        mkRonExpression 0 panels null;
-      description = ''
+    defaultNullOpts.mkNullable (lib.types.listOf panelSubmodule)
+      [
+        {
+          anchor = {
+            __type = "enum";
+            variant = "Bottom";
+          };
+          anchor_gap = true;
+          autohide = {
+            __type = "optional";
+            value = {
+              handle_size = 4;
+              transition_time = 200;
+              wait_time = 1000;
+            };
+          };
+          background = {
+            __type = "enum";
+            variant = "Dark";
+          };
+          expand_to_edges = true;
+          name = "Panel";
+          opacity = 1.0;
+          output = {
+            __type = "enum";
+            variant = "Name";
+            value = [ "Virtual-1" ];
+          };
+          plugins_center = {
+            __type = "optional";
+            value = [ "com.system76.CosmicAppletTime" ];
+          };
+          plugins_wings = {
+            __type = "optional";
+            value = {
+              __type = "tuple";
+              value = [
+                [
+                  "com.system76.CosmicPanelWorkspacesButton"
+                  "com.system76.CosmicPanelAppButton"
+                  "com.system76.CosmicAppletWorkspaces"
+                ]
+                [
+                  "com.system76.CosmicAppletInputSources"
+                  "com.system76.CosmicAppletStatusArea"
+                  "com.system76.CosmicAppletTiling"
+                  "com.system76.CosmicAppletAudio"
+                  "com.system76.CosmicAppletNetwork"
+                  "com.system76.CosmicAppletBattery"
+                  "com.system76.CosmicAppletNotifications"
+                  "com.system76.CosmicAppletBluetooth"
+                  "com.system76.CosmicAppletPower"
+                ]
+              ];
+            };
+          };
+          size = {
+            __type = "enum";
+            variant = "M";
+          };
+        }
+      ]
+      ''
         The panels that will be displayed on the desktop.
       '';
-    };
 
   config =
     let
@@ -256,7 +248,7 @@ in
 
       version = 1;
     in
-    lib.mkIf (cfg.panels != [ ]) {
+    lib.mkIf (cfg.panels != null) {
       wayland.desktopManager.cosmic.configFile = lib.mkMerge (
         [
           {

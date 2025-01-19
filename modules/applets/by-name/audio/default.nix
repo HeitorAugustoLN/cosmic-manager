@@ -1,7 +1,4 @@
 { lib, ... }:
-let
-  inherit (lib.cosmic) defaultNullOpts;
-in
 lib.cosmic.applets.mkCosmicApplet {
   name = "audio";
   originalName = "Sound";
@@ -10,11 +7,15 @@ lib.cosmic.applets.mkCosmicApplet {
 
   maintainers = [ lib.maintainers.HeitorAugustoLN ];
 
-  settingsOptions = {
-    show_media_controls_in_top_panel = defaultNullOpts.mkBool true ''
-      Whether to show media controls in the top panel.
-    '';
-  };
+  settingsOptions =
+    let
+      inherit (lib.cosmic) defaultNullOpts;
+    in
+    {
+      show_media_controls_in_top_panel = defaultNullOpts.mkBool true ''
+        Whether to show media controls in the top panel.
+      '';
+    };
 
   settingsExample = {
     show_media_controls_in_top_panel = true;

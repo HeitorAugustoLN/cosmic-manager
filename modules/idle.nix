@@ -2,10 +2,9 @@
 {
   options.wayland.desktopManager.cosmic.idle =
     let
-      inherit (lib.cosmic) defaultNullOpts mkRonExpression;
-    in
-    lib.mkOption {
-      type = lib.types.submodule {
+      inherit (lib.cosmic) defaultNullOpts;
+
+      inputSubmodule = lib.types.submodule {
         freeformType = with lib.types; attrsOf anything;
         options = {
           screen_off_time =
@@ -39,22 +38,22 @@
               '';
         };
       };
-      default = { };
-      example = mkRonExpression 0 {
+    in
+    defaultNullOpts.mkNullable inputSubmodule
+      {
         screen_off_time = 90000;
         suspend_on_ac_time = 180000;
         suspend_on_battery_time = 90000;
-      } null;
-      description = ''
+      }
+      ''
         Settings for the COSMIC idle manager.
       '';
-    };
 
   config.wayland.desktopManager.cosmic.configFile."com.system76.CosmicIdle" =
     let
       cfg = config.wayland.desktopManager.cosmic;
     in
-    lib.mkIf (cfg.idle != { }) {
+    lib.mkIf (cfg.idle != null) {
       entries = cfg.idle;
       version = 1;
     };
