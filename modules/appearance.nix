@@ -1371,7 +1371,8 @@
       home.activation.buildCosmicTheme =
         let
           needsBuild =
-            builtins.any (panel: panel.background != null && panel.background.variant == "Color") cfg.panels
+            cfg.panels != null
+            && builtins.any (panel: panel.background != null && panel.background.variant == "Color") cfg.panels
             || cfg.appearance.theme.dark != null
             || cfg.appearance.theme.light != null;
         in
