@@ -11,8 +11,8 @@ command-line interface with some utilities to use in conjunction with `cosmic-ma
 
 ## Getting started
 
-Ready to give it a try? Check out the [Getting started](./getting-started/README.md) guide to get started with `cosmic-manager`.
-Once you're done, you can take a look at all of our available options in the [Options](./options/index.md) section.
+Ready to give it a try? Check out the [Getting started](https://heitoraugustoln.github.io/cosmic-manager/getting-started/index.html) guide to get started with `cosmic-manager`.
+Once you're done, you can take a look at all of our available options in the [Options](https://heitoraugustoln.github.io/cosmic-manager/options/index.html) section.
 
 ## Found a bug?
 
@@ -20,5 +20,5 @@ If you found a bug, please open an issue on the [issue tracker](https://github.c
 
 ## Licenses
 
-- **GPL-3.0-only**: Applies to the `cosmic-manager` command-line interface located in the `cosmic-manager` subdirectory.
-- **MIT**: Covers Nix packages, `home-manager` modules, `cosmic-manager` library, documentation, and basically everything else.
+- [GPL-3.0-only](./LICENSE-GPL): Applies to the `cosmic-manager` command-line interface located in the `cosmic-manager` subdirectory.
+- [MIT](./LICENSE-MIT): Covers Nix packages, `home-manager` modules, `cosmic-manager` library, documentation, and basically everything else.
