@@ -21,7 +21,7 @@ rustPlatform.buildRustPackage {
   meta = {
     description = "cosmic-manager command-line interface";
     homepage = "https://github.com/HeitorAugustoLN/cosmic-manager";
-    license = lib.licenses.mit;
+    license = lib.licenses.gpl3Only;
     maintainers = [ lib.maintainers.HeitorAugustoLN ];
     mainProgram = "cosmic-manager";
     inherit (cosmic-comp.meta) platforms;
