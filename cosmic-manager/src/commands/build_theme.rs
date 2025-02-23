@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 use crate::commands::Command;
 use clap::Args;
 use cosmic::{

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 pub fn escape_string(input: &str) -> String {
     let mut output = String::with_capacity(input.len());
 

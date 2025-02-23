@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 use etcetera::{
     base_strategy::{BaseStrategy, Xdg},
     choose_base_strategy,
