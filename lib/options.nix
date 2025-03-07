@@ -145,7 +145,7 @@ in
       mkAttrs' = args: mkNullableWithRaw' (args // { type = types.attrs; });
 
       mkAttrsOf' =
-        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; attrsOf (maybeRONRaw type); });
+        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; attrsOf (maybeRonRaw type); });
 
       mkBool' = args: mkNullableWithRaw' (args // { type = types.bool; });
 
@@ -167,7 +167,7 @@ in
       mkInt' = args: mkNullableWithRaw' (args // { type = types.int; });
 
       mkListOf' =
-        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; listOf (maybeRONRaw type); });
+        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; listOf (maybeRonRaw type); });
 
       mkNullable' =
         args:
@@ -178,7 +178,7 @@ in
           }
         );
 
-      mkNullableWithRaw' = { type, ... }@args: mkNullable' (args // { type = types.maybeRONRaw type; });
+      mkNullableWithRaw' = { type, ... }@args: mkNullable' (args // { type = types.maybeRonRaw type; });
 
       mkNumber' = args: mkNullableWithRaw' (args // { type = types.number; });
 
@@ -201,7 +201,7 @@ in
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {
-            type = with types; ronArrayOf (maybeRONRaw type) size;
+            type = with types; ronArrayOf (maybeRonRaw type) size;
           }
         );
 
@@ -216,19 +216,19 @@ in
 
       mkRONMapOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with types; ronMapOf (maybeRONRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronMapOf (maybeRonRaw type); });
 
       mkRONNamedStruct' = args: mkNullableWithRaw' (args // { type = types.ronNamedStruct; });
 
       mkRONNamedStructOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with types; ronNamedStructOf (maybeRONRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronNamedStructOf (maybeRonRaw type); });
 
       mkRONOptional' = args: mkNullableWithRaw' (args // { type = types.ronOptional; });
 
       mkRONOptionalOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with types; ronOptionalOf (maybeRONRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronOptionalOf (maybeRonRaw type); });
 
       mkRONTuple' =
         { size, ... }@args:
@@ -264,7 +264,7 @@ in
             "variants"
           ]
           // {
-            type = with types; ronTupleEnumOf (maybeRONRaw type) variants size;
+            type = with types; ronTupleEnumOf (maybeRonRaw type) variants size;
           }
         );
 
@@ -274,7 +274,7 @@ in
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {
-            type = with types; ronTupleOf (maybeRONRaw type) size;
+            type = with types; ronTupleOf (maybeRonRaw type) size;
           }
         );
 
