@@ -195,9 +195,9 @@ in
           }
         );
 
-      mkRONArrayOf' =
+      mkRonArrayOf' =
         { size, type, ... }@args:
-        assert assertMsg (isInt size) "mkRONArrayOf': `size` must be an integer";
+        assert assertMsg (isInt size) "mkRonArrayOf': `size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {
@@ -205,40 +205,40 @@ in
           }
         );
 
-      mkRONChar' = args: mkNullableWithRaw' (args // { type = types.ronChar; });
+      mkRonChar' = args: mkNullableWithRaw' (args // { type = types.ronChar; });
 
-      mkRONEnum' =
+      mkRonEnum' =
         { variants, ... }@args:
-        assert assertMsg (isList variants) "mkRONEnum': `variants` must be a list";
+        assert assertMsg (isList variants) "mkRonEnum': `variants` must be a list";
         mkNullableWithRaw' (removeAttrs args [ "variants" ] // { type = types.ronEnum variants; });
 
-      mkRONMap' = args: mkNullableWithRaw' (args // { type = types.ronMap; });
+      mkRonMap' = args: mkNullableWithRaw' (args // { type = types.ronMap; });
 
-      mkRONMapOf' =
+      mkRonMapOf' =
         { type, ... }@args:
         mkNullableWithRaw' (args // { type = with types; ronMapOf (maybeRonRaw type); });
 
-      mkRONNamedStruct' = args: mkNullableWithRaw' (args // { type = types.ronNamedStruct; });
+      mkRonNamedStruct' = args: mkNullableWithRaw' (args // { type = types.ronNamedStruct; });
 
-      mkRONNamedStructOf' =
+      mkRonNamedStructOf' =
         { type, ... }@args:
         mkNullableWithRaw' (args // { type = with types; ronNamedStructOf (maybeRonRaw type); });
 
-      mkRONOptional' = args: mkNullableWithRaw' (args // { type = types.ronOptional; });
+      mkRonOptional' = args: mkNullableWithRaw' (args // { type = types.ronOptional; });
 
-      mkRONOptionalOf' =
+      mkRonOptionalOf' =
         { type, ... }@args:
         mkNullableWithRaw' (args // { type = with types; ronOptionalOf (maybeRonRaw type); });
 
-      mkRONTuple' =
+      mkRonTuple' =
         { size, ... }@args:
-        assert assertMsg (isInt size) "mkRONTuple': `size` must be an integer";
+        assert assertMsg (isInt size) "mkRonTuple': `size` must be an integer";
         mkNullableWithRaw' (removeAttrs args [ "size" ] // { type = types.ronTuple size; });
 
-      mkRONTupleEnum' =
+      mkRonTupleEnum' =
         { size, variants, ... }@args:
-        assert assertMsg (isList variants) "mkRONTupleEnum': `variants` must be a list";
-        assert assertMsg (isInt size) "mkRONTupleEnum': `size` must be an integer";
+        assert assertMsg (isList variants) "mkRonTupleEnum': `variants` must be a list";
+        assert assertMsg (isInt size) "mkRonTupleEnum': `size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [
             "size"
@@ -249,15 +249,15 @@ in
           }
         );
 
-      mkRONTupleEnumOf' =
+      mkRonTupleEnumOf' =
         {
           size,
           type,
           variants,
           ...
         }@args:
-        assert assertMsg (isList variants) "mkRONTupleEnumOf': `variants` must be a list";
-        assert assertMsg (isInt size) "mkRONTupleEnumOf': `size` must be an integer";
+        assert assertMsg (isList variants) "mkRonTupleEnumOf': `variants` must be a list";
+        assert assertMsg (isInt size) "mkRonTupleEnumOf': `size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [
             "size"
@@ -268,9 +268,9 @@ in
           }
         );
 
-      mkRONTupleOf' =
+      mkRonTupleOf' =
         { size, type, ... }@args:
-        assert assertMsg (isInt size) "mkRONTupleOf': `size` must be an integer";
+        assert assertMsg (isInt size) "mkRonTupleOf': `size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {
@@ -307,19 +307,19 @@ in
         mkNullableWithRaw'
         mkNumber'
         mkRaw'
-        mkRONArrayOf'
-        mkRONChar'
-        mkRONEnum'
-        mkRONMap'
-        mkRONMapOf'
-        mkRONNamedStruct'
-        mkRONNamedStructOf'
-        mkRONOptional'
-        mkRONOptionalOf'
-        mkRONTuple'
-        mkRONTupleEnum'
-        mkRONTupleEnumOf'
-        mkRONTupleOf'
+        mkRonArrayOf'
+        mkRonChar'
+        mkRonEnum'
+        mkRonMap'
+        mkRonMapOf'
+        mkRonNamedStruct'
+        mkRonNamedStructOf'
+        mkRonOptional'
+        mkRonOptionalOf'
+        mkRonTuple'
+        mkRonTupleEnum'
+        mkRonTupleEnumOf'
+        mkRonTupleOf'
         mkPositiveInt'
         mkStr'
         mkU8'
@@ -368,9 +368,9 @@ in
 
       mkRaw = example: description: mkRaw' { inherit description example; };
 
-      mkRONArrayOf =
+      mkRonArrayOf =
         type: size: example: description:
-        mkRONArrayOf' {
+        mkRonArrayOf' {
           inherit
             description
             example
@@ -379,37 +379,37 @@ in
             ;
         };
 
-      mkRONChar = example: description: mkRONChar' { inherit description example; };
+      mkRonChar = example: description: mkRonChar' { inherit description example; };
 
-      mkRONEnum =
+      mkRonEnum =
         variants: example: description:
-        mkRONEnum' { inherit description example variants; };
+        mkRonEnum' { inherit description example variants; };
 
-      mkRONMap = example: description: mkRONMap' { inherit description example; };
+      mkRonMap = example: description: mkRonMap' { inherit description example; };
 
-      mkRONMapOf =
+      mkRonMapOf =
         type: example: description:
-        mkRONMapOf' { inherit description example type; };
+        mkRonMapOf' { inherit description example type; };
 
-      mkRONNamedStruct = example: description: mkRONNamedStruct' { inherit description example; };
+      mkRonNamedStruct = example: description: mkRonNamedStruct' { inherit description example; };
 
-      mkRONNamedStructOf =
+      mkRonNamedStructOf =
         type: example: description:
-        mkRONNamedStructOf' { inherit description example type; };
+        mkRonNamedStructOf' { inherit description example type; };
 
-      mkRONOptional = example: description: mkRONOptional' { inherit description example; };
+      mkRonOptional = example: description: mkRonOptional' { inherit description example; };
 
-      mkRONOptionalOf =
+      mkRonOptionalOf =
         type: example: description:
-        mkRONOptionalOf' { inherit description example type; };
+        mkRonOptionalOf' { inherit description example type; };
 
-      mkRONTuple =
+      mkRonTuple =
         size: example: description:
-        mkRONTuple' { inherit description example size; };
+        mkRonTuple' { inherit description example size; };
 
-      mkRONTupleEnum =
+      mkRonTupleEnum =
         variants: size: example: description:
-        mkRONTupleEnum' {
+        mkRonTupleEnum' {
           inherit
             description
             example
@@ -418,9 +418,9 @@ in
             ;
         };
 
-      mkRONTupleEnumOf =
+      mkRonTupleEnumOf =
         type: variants: size: example: description:
-        mkRONTupleEnumOf' {
+        mkRonTupleEnumOf' {
           inherit
             description
             example
@@ -430,9 +430,9 @@ in
             ;
         };
 
-      mkRONTupleOf =
+      mkRonTupleOf =
         type: size: example: description:
-        mkRONTupleOf' {
+        mkRonTupleOf' {
           inherit
             description
             example
