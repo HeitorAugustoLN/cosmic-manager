@@ -1,7 +1,34 @@
 # Heavily inspired by nixvim
 { lib, ... }:
 let
-  inherit (lib.cosmic) literalRon mkRonExpression;
+  inherit (builtins)
+    getAttr
+    isAttrs
+    isInt
+    isList
+    isString
+    mapAttrs
+    removeAttrs
+    toJSON
+    ;
+  inherit (lib)
+    assertMsg
+    literalExpression
+    mkOption
+    optionalAttrs
+    types
+    ;
+  inherit (lib.cosmic) isRONType mkRON;
+  inherit (lib.generators) toPretty;
+  inherit (lib.strings) replicate;
+
+  literalRON =
+    r:
+    let
+      raw = mkRON "raw" r;
+      expression = ''cosmicLib.cosmic.mkRON "raw" ${toJSON raw.value}'';
+    in
+    literalExpression expression;
 
   mkNullOrOption' =
     {
@@ -9,16 +36,99 @@ let
       default ? null,
       ...
     }@args:
-    lib.mkOption (
+    mkOption (
       args
       // {
-        type = lib.types.nullOr type;
+        type = types.nullOr type;
         inherit default;
       }
     );
+
+  mkRONExpression =
+    let
+      mkRONExpression' =
+        startIndent: value: previousType:
+        let
+          nextIndent = startIndent + 1;
+
+          indent = level: replicate level "  ";
+
+          toRONExpression =
+            type: value:
+            let
+              v = nestedRONExpression type value (indent startIndent);
+            in
+            if previousType == null || previousType == "namedStruct" then
+              v
+            else
+              nestedLiteral "(${v.__pretty v.val})";
+        in
+        if isRONType value then
+          if value.__type == "enum" then
+            if value ? variant then
+              if value ? value then
+                toRONExpression "enum" {
+                  inherit (value) variant;
+                  value = map (v: mkRONExpression' (nextIndent + 1) v "enum") value.value;
+                }
+              else
+                toRONExpression "enum" value.variant
+            else
+              throw "lib.cosmic.mkRONExpression: enum type must have at least a variant key."
+          else if value.__type == "namedStruct" then
+            if value ? name && value ? value then
+              toRONExpression "namedStruct" {
+                inherit (value) name;
+                value = mapAttrs (_: v: mkRONExpression' nextIndent v "namedStruct") value.value;
+              }
+            else
+              throw "lib.cosmic.mkRONExpression: namedStruct type must have name and value keys."
+          else if isRONType value.value then
+            toRONExpression value.__type (mkRONExpression' startIndent value.value value.__type)
+          else if isList value.value then
+            toRONExpression value.__type (map (v: mkRONExpression' nextIndent v value.__type) value.value)
+          else if isAttrs value.value then
+            toRONExpression value.__type (
+              mapAttrs (_: v: mkRONExpression' nextIndent v value.__type) value.value
+            )
+          else
+            toRONExpression value.__type value.value
+        else if isList value then
+          map (v: mkRONExpression' nextIndent v "list") value
+        else if isAttrs value then
+          mapAttrs (_: v: mkRONExpression' nextIndent v null) value
+        else
+          value;
+    in
+    mkRONExpression';
+
+  nestedLiteral = val: {
+    __pretty = getAttr "text";
+    val = if val._type or null == "literalExpression" then val else literalExpression val;
+  };
+
+  nestedRONExpression =
+    type: value: indent:
+    nestedLiteral (RONExpression type value indent);
+
+  RONExpression =
+    type: value: indent:
+    literalExpression ''cosmicLib.cosmic.mkRON "${type}" ${
+      toPretty {
+        allowPrettyValues = true;
+        inherit indent;
+      } value
+    }'';
 in
 {
-  inherit mkNullOrOption';
+  inherit
+    literalRON
+    mkNullOrOption'
+    mkRONExpression
+    nestedLiteral
+    nestedRONExpression
+    RONExpression
+    ;
 
   defaultNullOpts =
     let
@@ -32,163 +142,153 @@ in
           -> abort "defaultNullOpts: unexpected argument `defaultText`. Did you mean `pluginDefault`?";
         args // { default = null; };
 
-      mkAttrs' = args: mkNullableWithRaw' (args // { type = lib.types.attrs; });
+      mkAttrs' = args: mkNullableWithRaw' (args // { type = types.attrs; });
 
       mkAttrsOf' =
-        { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with lib.types; attrsOf (maybeRonRaw type); });
+        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; attrsOf (maybeRONRaw type); });
 
-      mkBool' = args: mkNullableWithRaw' (args // { type = lib.types.bool; });
+      mkBool' = args: mkNullableWithRaw' (args // { type = types.bool; });
 
       mkEnum' =
         { variants, ... }@args:
-        assert lib.assertMsg (builtins.isList variants) "mkEnum': `variants` must be a list";
-        mkNullableWithRaw' (
-          builtins.removeAttrs args [ "variants" ] // { type = lib.types.enum variants; }
-        );
+        assert assertMsg (isList variants) "mkEnum': `variants` must be a list";
+        mkNullableWithRaw' (removeAttrs args [ "variants" ] // { type = types.enum variants; });
 
-      mkFloat' = args: mkNullableWithRaw' (args // { type = lib.types.float; });
+      mkFloat' = args: mkNullableWithRaw' (args // { type = types.float; });
 
-      mkHexColor' = args: mkNullableWithRaw' (args // { type = lib.types.hexColor; });
+      mkHexColor' = args: mkNullableWithRaw' (args // { type = types.hexColor; });
 
-      mkI8' = args: mkNullableWithRaw' (args // { type = lib.types.ints.s8; });
+      mkI8' = args: mkNullableWithRaw' (args // { type = types.ints.s8; });
 
-      mkI16' = args: mkNullableWithRaw' (args // { type = lib.types.ints.s16; });
+      mkI16' = args: mkNullableWithRaw' (args // { type = types.ints.s16; });
 
-      mkI32' = args: mkNullableWithRaw' (args // { type = lib.types.ints.s32; });
+      mkI32' = args: mkNullableWithRaw' (args // { type = types.ints.s32; });
 
-      mkInt' = args: mkNullableWithRaw' (args // { type = lib.types.int; });
+      mkInt' = args: mkNullableWithRaw' (args // { type = types.int; });
 
       mkListOf' =
-        { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with lib.types; listOf (maybeRonRaw type); });
+        { type, ... }@args: mkNullableWithRaw' (args // { type = with types; listOf (maybeRONRaw type); });
 
       mkNullable' =
         args:
         mkNullOrOption' (
           processDefaultNullArgs args
-          // lib.optionalAttrs (args ? example) {
-            example = mkRonExpression 0 args.example null;
+          // optionalAttrs (args ? example) {
+            example = mkRONExpression 0 args.example null;
           }
         );
 
-      mkNullableWithRaw' =
-        { type, ... }@args: mkNullable' (args // { type = lib.types.maybeRonRaw type; });
+      mkNullableWithRaw' = { type, ... }@args: mkNullable' (args // { type = types.maybeRONRaw type; });
 
-      mkNumber' = args: mkNullableWithRaw' (args // { type = lib.types.number; });
+      mkNumber' = args: mkNullableWithRaw' (args // { type = types.number; });
 
       mkRaw' =
         args:
         mkNullable' (
           args
           // {
-            type = lib.types.ronRaw;
+            type = types.ronRaw;
           }
-          // lib.optionalAttrs (args ? example) {
+          // optionalAttrs (args ? example) {
             example =
-              if builtins.isString args.example then
-                literalRon args.example
-              else
-                mkRonExpression 0 args.example null;
+              if isString args.example then literalRON args.example else mkRONExpression 0 args.example null;
           }
         );
 
-      mkRonArrayOf' =
+      mkRONArrayOf' =
         { size, type, ... }@args:
-        assert lib.assertMsg (builtins.isInt size) "mkRonArrayOf': `size` must be an integer";
+        assert assertMsg (isInt size) "mkRONArrayOf': `size` must be an integer";
         mkNullableWithRaw' (
-          builtins.removeAttrs args [ "size" ]
+          removeAttrs args [ "size" ]
           // {
-            type = with lib.types; ronArrayOf (maybeRonRaw type) size;
+            type = with types; ronArrayOf (maybeRONRaw type) size;
           }
         );
 
-      mkRonChar' = args: mkNullableWithRaw' (args // { type = lib.types.ronChar; });
+      mkRONChar' = args: mkNullableWithRaw' (args // { type = types.ronChar; });
 
-      mkRonEnum' =
+      mkRONEnum' =
         { variants, ... }@args:
-        assert lib.assertMsg (builtins.isList variants) "mkRonEnum': `variants` must be a list";
-        mkNullableWithRaw' (
-          builtins.removeAttrs args [ "variants" ] // { type = lib.types.ronEnum variants; }
-        );
+        assert assertMsg (isList variants) "mkRONEnum': `variants` must be a list";
+        mkNullableWithRaw' (removeAttrs args [ "variants" ] // { type = types.ronEnum variants; });
 
-      mkRonMap' = args: mkNullableWithRaw' (args // { type = lib.types.ronMap; });
+      mkRONMap' = args: mkNullableWithRaw' (args // { type = types.ronMap; });
 
-      mkRonMapOf' =
+      mkRONMapOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with lib.types; ronMapOf (maybeRonRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronMapOf (maybeRONRaw type); });
 
-      mkRonNamedStruct' = args: mkNullableWithRaw' (args // { type = lib.types.ronNamedStruct; });
+      mkRONNamedStruct' = args: mkNullableWithRaw' (args // { type = types.ronNamedStruct; });
 
-      mkRonNamedStructOf' =
+      mkRONNamedStructOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with lib.types; ronNamedStructOf (maybeRonRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronNamedStructOf (maybeRONRaw type); });
 
-      mkRonOptional' = args: mkNullableWithRaw' (args // { type = lib.types.ronOptional; });
+      mkRONOptional' = args: mkNullableWithRaw' (args // { type = types.ronOptional; });
 
-      mkRonOptionalOf' =
+      mkRONOptionalOf' =
         { type, ... }@args:
-        mkNullableWithRaw' (args // { type = with lib.types; ronOptionalOf (maybeRonRaw type); });
+        mkNullableWithRaw' (args // { type = with types; ronOptionalOf (maybeRONRaw type); });
 
-      mkRonTuple' =
+      mkRONTuple' =
         { size, ... }@args:
-        assert lib.assertMsg (builtins.isInt size) "mkRonTuple': `size` must be an integer";
-        mkNullableWithRaw' (builtins.removeAttrs args [ "size" ] // { type = lib.types.ronTuple size; });
+        assert assertMsg (isInt size) "mkRONTuple': `size` must be an integer";
+        mkNullableWithRaw' (removeAttrs args [ "size" ] // { type = types.ronTuple size; });
 
-      mkRonTupleEnum' =
+      mkRONTupleEnum' =
         { size, variants, ... }@args:
-        assert lib.assertMsg (builtins.isList variants) "mkRonTupleEnum': `variants` must be a list";
-        assert lib.assertMsg (builtins.isInt size) "mkRonTupleEnum': `size` must be an integer";
+        assert assertMsg (isList variants) "mkRONTupleEnum': `variants` must be a list";
+        assert assertMsg (isInt size) "mkRONTupleEnum': `size` must be an integer";
         mkNullableWithRaw' (
-          builtins.removeAttrs args [
+          removeAttrs args [
             "size"
             "variants"
           ]
           // {
-            type = lib.types.ronTupleEnum variants size;
+            type = types.ronTupleEnum variants size;
           }
         );
 
-      mkRonTupleEnumOf' =
+      mkRONTupleEnumOf' =
         {
           size,
           type,
           variants,
           ...
         }@args:
-        assert lib.assertMsg (builtins.isList variants) "mkRonTupleEnumOf': `variants` must be a list";
-        assert lib.assertMsg (builtins.isInt size) "mkRonTupleEnumOf': `size` must be an integer";
+        assert assertMsg (isList variants) "mkRONTupleEnumOf': `variants` must be a list";
+        assert assertMsg (isInt size) "mkRONTupleEnumOf': `size` must be an integer";
         mkNullableWithRaw' (
-          builtins.removeAttrs args [
+          removeAttrs args [
             "size"
             "variants"
           ]
           // {
-            type = with lib.types; ronTupleEnumOf (maybeRonRaw type) variants size;
+            type = with types; ronTupleEnumOf (maybeRONRaw type) variants size;
           }
         );
 
-      mkRonTupleOf' =
+      mkRONTupleOf' =
         { size, type, ... }@args:
-        assert lib.assertMsg (builtins.isInt size) "mkRonTupleOf': `size` must be an integer";
+        assert assertMsg (isInt size) "mkRONTupleOf': `size` must be an integer";
         mkNullableWithRaw' (
-          builtins.removeAttrs args [ "size" ]
+          removeAttrs args [ "size" ]
           // {
-            type = with lib.types; ronTupleOf (maybeRonRaw type) size;
+            type = with types; ronTupleOf (maybeRONRaw type) size;
           }
         );
 
-      mkPositiveInt' = args: mkNullableWithRaw' (args // { type = lib.types.ints.positive; });
+      mkPositiveInt' = args: mkNullableWithRaw' (args // { type = types.ints.positive; });
 
-      mkStr' = args: mkNullableWithRaw' (args // { type = lib.types.str; });
+      mkStr' = args: mkNullableWithRaw' (args // { type = types.str; });
 
-      mkU8' = args: mkNullableWithRaw' (args // { type = lib.types.ints.u8; });
+      mkU8' = args: mkNullableWithRaw' (args // { type = types.ints.u8; });
 
-      mkU16' = args: mkNullableWithRaw' (args // { type = lib.types.ints.u16; });
+      mkU16' = args: mkNullableWithRaw' (args // { type = types.ints.u16; });
 
-      mkU32' = args: mkNullableWithRaw' (args // { type = lib.types.ints.u32; });
+      mkU32' = args: mkNullableWithRaw' (args // { type = types.ints.u32; });
 
-      mkUnsignedInt' = args: mkNullableWithRaw' (args // { type = lib.types.ints.unsigned; });
+      mkUnsignedInt' = args: mkNullableWithRaw' (args // { type = types.ints.unsigned; });
     in
     {
       inherit
@@ -207,19 +307,19 @@ in
         mkNullableWithRaw'
         mkNumber'
         mkRaw'
-        mkRonArrayOf'
-        mkRonChar'
-        mkRonEnum'
-        mkRonMap'
-        mkRonMapOf'
-        mkRonNamedStruct'
-        mkRonNamedStructOf'
-        mkRonOptional'
-        mkRonOptionalOf'
-        mkRonTuple'
-        mkRonTupleEnum'
-        mkRonTupleEnumOf'
-        mkRonTupleOf'
+        mkRONArrayOf'
+        mkRONChar'
+        mkRONEnum'
+        mkRONMap'
+        mkRONMapOf'
+        mkRONNamedStruct'
+        mkRONNamedStructOf'
+        mkRONOptional'
+        mkRONOptionalOf'
+        mkRONTuple'
+        mkRONTupleEnum'
+        mkRONTupleEnumOf'
+        mkRONTupleOf'
         mkPositiveInt'
         mkStr'
         mkU8'
@@ -268,9 +368,9 @@ in
 
       mkRaw = example: description: mkRaw' { inherit description example; };
 
-      mkRonArrayOf =
+      mkRONArrayOf =
         type: size: example: description:
-        mkRonArrayOf' {
+        mkRONArrayOf' {
           inherit
             description
             example
@@ -279,37 +379,37 @@ in
             ;
         };
 
-      mkRonChar = example: description: mkRonChar' { inherit description example; };
+      mkRONChar = example: description: mkRONChar' { inherit description example; };
 
-      mkRonEnum =
+      mkRONEnum =
         variants: example: description:
-        mkRonEnum' { inherit description example variants; };
+        mkRONEnum' { inherit description example variants; };
 
-      mkRonMap = example: description: mkRonMap' { inherit description example; };
+      mkRONMap = example: description: mkRONMap' { inherit description example; };
 
-      mkRonMapOf =
+      mkRONMapOf =
         type: example: description:
-        mkRonMapOf' { inherit description example type; };
+        mkRONMapOf' { inherit description example type; };
 
-      mkRonNamedStruct = example: description: mkRonNamedStruct' { inherit description example; };
+      mkRONNamedStruct = example: description: mkRONNamedStruct' { inherit description example; };
 
-      mkRonNamedStructOf =
+      mkRONNamedStructOf =
         type: example: description:
-        mkRonNamedStructOf' { inherit description example type; };
+        mkRONNamedStructOf' { inherit description example type; };
 
-      mkRonOptional = example: description: mkRonOptional' { inherit description example; };
+      mkRONOptional = example: description: mkRONOptional' { inherit description example; };
 
-      mkRonOptionalOf =
+      mkRONOptionalOf =
         type: example: description:
-        mkRonOptionalOf' { inherit description example type; };
+        mkRONOptionalOf' { inherit description example type; };
 
-      mkRonTuple =
+      mkRONTuple =
         size: example: description:
-        mkRonTuple' { inherit description example size; };
+        mkRONTuple' { inherit description example size; };
 
-      mkRonTupleEnum =
+      mkRONTupleEnum =
         variants: size: example: description:
-        mkRonTupleEnum' {
+        mkRONTupleEnum' {
           inherit
             description
             example
@@ -318,9 +418,9 @@ in
             ;
         };
 
-      mkRonTupleEnumOf =
+      mkRONTupleEnumOf =
         type: variants: size: example: description:
-        mkRonTupleEnumOf' {
+        mkRONTupleEnumOf' {
           inherit
             description
             example
@@ -330,9 +430,9 @@ in
             ;
         };
 
-      mkRonTupleOf =
+      mkRONTupleOf =
         type: size: example: description:
-        mkRonTupleOf' {
+        mkRONTupleOf' {
           inherit
             description
             example
@@ -362,9 +462,9 @@ in
       example ? null,
       options ? { },
     }:
-    lib.mkOption {
+    mkOption {
       type =
-        with lib.types;
+        with types;
         submodule {
           freeformType = attrsOf anything;
           inherit options;
@@ -433,9 +533,11 @@ in
               };
             };
           in
-          mkRonExpression 0 ex null
+          mkRONExpression 0 ex null
         else
-          mkRonExpression 0 example null;
+          mkRONExpression 0 example null;
       inherit description;
     };
+
+  nestedLiteralRON = r: nestedLiteral (literalRON r);
 }

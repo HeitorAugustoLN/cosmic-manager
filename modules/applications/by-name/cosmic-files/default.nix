@@ -182,9 +182,9 @@ lib.cosmic.applications.mkCosmicApplication {
                   ]);
                 example =
                   let
-                    inherit (lib.cosmic) mkRonExpression;
+                    inherit (lib.cosmic) mkRONExpression;
                   in
-                  mkRonExpression 0 {
+                  mkRONExpression 0 {
                     __type = "enum";
                     variant = "List";
                   } null;

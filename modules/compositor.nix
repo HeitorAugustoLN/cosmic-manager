@@ -1,7 +1,7 @@
 { config, lib, ... }:
 let
   inherit (lib) mkIf mkOption types;
-  inherit (lib.cosmic) defaultNullOpts mkRonExpression;
+  inherit (lib.cosmic) defaultNullOpts mkRONExpression;
 in
 {
   options.wayland.desktopManager.cosmic.compositor =
@@ -27,7 +27,7 @@ in
                               ])
                             )
                           );
-                        example = mkRonExpression 0 {
+                        example = mkRONExpression 0 {
                           __type = "optional";
                           value = {
                             __type = "enum";
@@ -169,7 +169,7 @@ in
                               ])
                             )
                           );
-                        example = mkRonExpression 0 {
+                        example = mkRONExpression 0 {
                           __type = "optional";
                           value = {
                             __type = "enum";
@@ -263,7 +263,7 @@ in
                               ])
                             )
                           );
-                        example = mkRonExpression 0 {
+                        example = mkRONExpression 0 {
                           __type = "optional";
                           value = {
                             __type = "enum";
@@ -358,7 +358,7 @@ in
                           "Continuously"
                           "OnEdge"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "Continuously";
                       } null;
@@ -511,7 +511,7 @@ in
                         "BootOn"
                         "LastBoot"
                       ]);
-                    example = mkRonExpression 0 {
+                    example = mkRONExpression 0 {
                       __type = "enum";
                       variant = "BootOff";
                     } null;
@@ -544,7 +544,7 @@ in
                           "Horizontal"
                           "Vertical"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "Vertical";
                       } null;
@@ -563,7 +563,7 @@ in
                           "Global"
                           "OutputBound"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "OutputBound";
                       } null;

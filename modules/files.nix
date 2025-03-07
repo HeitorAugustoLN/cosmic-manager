@@ -67,7 +67,7 @@
           - `enum`: The value is stored as an enum variant.
         - Named structs: A structured entry with a name identifier.
 
-        All values are serialized to RON format using `lib.cosmic.generators.toRON`.
+        All values are serialized to RON format using `lib.cosmic.ron.toRON`.
       '';
     };
 
@@ -95,7 +95,7 @@
             - `enum`: The value is stored as an enum variant.
           - Named structs: A structured entry with a name identifier.
 
-        All values are serialized to RON format using `lib.cosmic.generators.toRON`.
+        All values are serialized to RON format using `lib.cosmic.ron.toRON`.
       '';
     };
 
@@ -143,7 +143,7 @@
             - `enum`: The value is stored as an enum variant.
           - Named structs: A structured entry with a name identifier.
 
-        All values are serialized to RON format using `lib.cosmic.generators.toRON`.
+        All values are serialized to RON format using `lib.cosmic.ron.toRON`.
       '';
     };
 
@@ -221,7 +221,7 @@
 
             operation = "write";
             xdg_directory = xdgDirectory;
-            entries = builtins.mapAttrs (_key: value: lib.cosmic.generators.toRON 0 value) (
+            entries = builtins.mapAttrs (_: value: lib.cosmic.ron.toRON 0 value) (
               lib.cosmic.utils.cleanNullsExceptOptional details.entries
             );
           }) components

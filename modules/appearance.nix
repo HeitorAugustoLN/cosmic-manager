@@ -10,7 +10,7 @@
 
   options.wayland.desktopManager.cosmic.appearance =
     let
-      inherit (lib.cosmic) defaultNullOpts mkRonExpression;
+      inherit (lib.cosmic) defaultNullOpts mkRONExpression;
     in
     {
       theme =
@@ -119,7 +119,7 @@
                       options = {
                         radius_0 = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               0.0
@@ -135,7 +135,7 @@
 
                         radius_xs = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               4.0
@@ -151,7 +151,7 @@
 
                         radius_s = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               8.0
@@ -167,7 +167,7 @@
 
                         radius_m = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               16.0
@@ -183,7 +183,7 @@
 
                         radius_l = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               32.0
@@ -199,7 +199,7 @@
 
                         radius_xl = lib.mkOption {
                           type = with lib.types; maybeRonRaw (ronTupleOf float 4);
-                          example = mkRonExpression 0 {
+                          example = mkRONExpression 0 {
                             __type = "tuple";
                             value = [
                               160.0
@@ -1240,7 +1240,7 @@
                           "ExtraExpanded"
                           "UltraExpanded"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "Normal";
                       } null;
@@ -1257,7 +1257,7 @@
                           "Italic"
                           "Oblique"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "Normal";
                       } null;
@@ -1280,7 +1280,7 @@
                           "ExtraBold"
                           "Black"
                         ]);
-                      example = mkRonExpression 0 {
+                      example = mkRONExpression 0 {
                         __type = "enum";
                         variant = "Normal";
                       } null;

@@ -1,19 +1,59 @@
 { lib, ... }:
 let
-  rawRon = lib.mkOptionType {
+  inherit (builtins)
+    all
+    attrNames
+    concatLists
+    elem
+    elemAt
+    filter
+    foldl'
+    fromJSON
+    head
+    isAttrs
+    isFunction
+    isList
+    isPath
+    isString
+    length
+    mapAttrs
+    match
+    stringLength
+    tail
+    zipAttrsWith
+    ;
+  inherit (lib)
+    assertMsg
+    concatMapStringsSep
+    defaultFunctor
+    filterAttrs
+    imap1
+    mergeDefinitions
+    mkOption
+    mkOptionType
+    showOption
+    splitString
+    trim
+    types
+    unique
+    warn
+    ;
+  inherit (lib.options) mergeEqualOption showDefs;
+
+  rawRon = mkOptionType {
     check =
       value:
       let
-        keys = builtins.attrNames value;
+        keys = attrNames value;
       in
-      builtins.isAttrs value
+      isAttrs value
       &&
         [
           "__type"
           "value"
         ] == keys
       && value.__type == "raw"
-      && builtins.isString value.value;
+      && isString value.value;
     description = "raw RON value";
     descriptionClass = "noun";
     emptyValue = {
@@ -22,25 +62,25 @@ let
         value = "";
       };
     };
-    merge = lib.options.mergeEqualOption;
+    merge = mergeEqualOption;
     name = "rawRon";
   };
 in
 {
   inherit rawRon;
 
-  cosmicComponent = lib.types.submodule {
+  cosmicComponent = types.submodule {
     options = {
-      version = lib.mkOption {
-        type = lib.types.ints.unsigned;
+      version = mkOption {
+        type = types.ints.unsigned;
         example = 1;
         description = ''
           Schema version number for the component configuration.
         '';
       };
 
-      entries = lib.mkOption {
-        type = with lib.types; attrsOf anything;
+      entries = mkOption {
+        type = with types; attrsOf anything;
         example = {
           autotile = true;
           autotile_behavior = {
@@ -55,15 +95,15 @@ in
     };
   };
 
-  hexColor = lib.types.strMatching "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" // {
+  hexColor = types.strMatching "^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" // {
     description = "hex color";
   };
 
   maybeRonRaw =
     elemType:
     let
-      ronFirst = lib.types.either rawRon elemType;
-      elemFirst = lib.types.either elemType rawRon;
+      ronFirst = types.either rawRon elemType;
+      elemFirst = types.either elemType rawRon;
     in
     ronFirst
     // {
@@ -73,32 +113,32 @@ in
 
   ronArrayOf =
     elemType: size:
-    with lib.types;
-    addCheck (listOf elemType) (x: builtins.length x == size)
+    with types;
+    addCheck (listOf elemType) (x: length x == size)
     // {
       description = "list of ${
         optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
       } with a fixed-size of ${toString size} elements";
     };
 
-  ronChar = lib.mkOptionType {
+  ronChar = mkOptionType {
     check =
       value:
       let
-        keys = builtins.attrNames value;
+        keys = attrNames value;
       in
-      builtins.isAttrs value
+      isAttrs value
       &&
         [
           "__type"
           "value"
         ] == keys
       && value.__type == "char"
-      && builtins.isString value.value
-      && builtins.stringLength value.value == 1;
+      && isString value.value
+      && stringLength value.value == 1;
     description = "RON char";
     descriptionClass = "noun";
-    merge = lib.options.mergeEqualOption;
+    merge = mergeEqualOption;
     name = "ronChar";
   };
 
@@ -110,61 +150,59 @@ in
           name = "ronEnum";
           show = v: ''"${v}"'';
         in
-        assert lib.assertMsg (builtins.all (
-          value: builtins.isString value
-        ) variants) "All variants in the enum must be strings.";
-        lib.mkOptionType {
+        assert assertMsg (all (value: isString value) variants) "All variants in the enum must be strings.";
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
                 "variant"
               ] == keys
             && value.__type == "enum"
-            && builtins.elem value.variant variants;
+            && elem value.variant variants;
           description =
             if variants == [ ] then
               "impossible (empty RON enum)"
-            else if builtins.length variants == 1 then
-              "RON enum variant ${show (builtins.head variants)} (singular RON enum)"
+            else if length variants == 1 then
+              "RON enum variant ${show (head variants)} (singular RON enum)"
             else
-              "one of the following RON enum variants: ${lib.concatMapStringsSep ", " show variants}";
-          descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
-          functor = lib.defaultFunctor name // {
+              "one of the following RON enum variants: ${concatMapStringsSep ", " show variants}";
+          descriptionClass = if length variants < 2 then "noun" else "conjunction";
+          functor = defaultFunctor name // {
             payload = { inherit variants; };
             type = payload: ronEnum' payload.variants;
-            binOp = a: b: { variants = lib.unique (a.variants + b.variants); };
+            binOp = a: b: { variants = unique (a.variants + b.variants); };
           };
-          merge = lib.options.mergeEqualOption;
+          merge = mergeEqualOption;
           inherit name;
         };
     in
     ronEnum';
 
-  ronMap = lib.mkOptionType {
+  ronMap = mkOptionType {
     check =
       value:
       let
-        keys = builtins.attrNames value;
+        keys = attrNames value;
       in
-      builtins.isAttrs value
+      isAttrs value
       &&
         [
           "__type"
           "value"
         ] == keys
       && value.__type == "map"
-      && builtins.isList value.value
-      && builtins.all (
+      && isList value.value
+      && all (
         entry:
-        builtins.isAttrs entry
+        isAttrs entry
         &&
-          builtins.attrNames entry == [
+          attrNames entry == [
             "key"
             "value"
           ]
@@ -179,7 +217,7 @@ in
     };
     merge = _loc: defs: {
       __type = "map";
-      value = builtins.concatLists (map (def: def.value.value) defs);
+      value = concatLists (map (def: def.value.value) defs);
     };
     name = "ronMap";
   };
@@ -191,31 +229,31 @@ in
           name = "ronMapOf";
         in
         elemType:
-        lib.mkOptionType {
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
                 "value"
               ] == keys
             && value.__type == "map"
-            && builtins.isList value.value
-            && builtins.all (
+            && isList value.value
+            && all (
               entry:
-              builtins.isAttrs entry
+              isAttrs entry
               &&
-                builtins.attrNames entry == [
+                attrNames entry == [
                   "key"
                   "value"
                 ]
             ) value.value;
           description = "RON map of ${
-            lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+            types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
           }";
           descriptionClass = "composite";
           emptyValue = {
@@ -224,7 +262,7 @@ in
               value = [ ];
             };
           };
-          functor = lib.defaultFunctor name // {
+          functor = defaultFunctor name // {
             binOp =
               a: b:
               let
@@ -235,8 +273,8 @@ in
             type = payload: ronMapOf' payload.elemType;
             wrappedDeprecationMessage =
               { loc }:
-              lib.warn ''
-                The deprecated `type.functor.wrapped` attribute of the option `${lib.showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
+              warn ''
+                The deprecated `type.functor.wrapped` attribute of the option `${showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
               '' elemType;
           };
           inherit (elemType) getSubModules;
@@ -251,13 +289,13 @@ in
             );
           merge = loc: defs: {
             __type = "map";
-            value = builtins.concatLists (
-              lib.imap1 (
+            value = concatLists (
+              imap1 (
                 n: def:
-                lib.imap1 (m: entry: {
+                imap1 (m: entry: {
                   inherit (entry) key;
                   value =
-                    (lib.mergeDefinitions
+                    (mergeDefinitions
                       (
                         loc
                         ++ [
@@ -284,13 +322,13 @@ in
     in
     ronMapOf';
 
-  ronNamedStruct = lib.mkOptionType {
+  ronNamedStruct = mkOptionType {
     check =
       value:
       let
-        keys = builtins.attrNames value;
+        keys = attrNames value;
       in
-      builtins.isAttrs value
+      isAttrs value
       &&
         [
           "__type"
@@ -298,11 +336,11 @@ in
           "value"
         ] == keys
       && value.__type == "namedStruct"
-      && builtins.isString value.name
-      && builtins.isAttrs value.value;
+      && isString value.name
+      && isAttrs value.value;
     description = "RON named struct";
     descriptionClass = "noun";
-    merge = lib.options.mergeEqualOption;
+    merge = mergeEqualOption;
     name = "ronNamedStruct";
   };
 
@@ -313,13 +351,13 @@ in
           name = "ronNamedStructOf";
         in
         elemType:
-        lib.mkOptionType {
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
@@ -327,13 +365,13 @@ in
                 "value"
               ] == keys
             && value.__type == "namedStruct"
-            && builtins.isString value.name
-            && builtins.isAttrs value.value;
+            && isString value.name
+            && isAttrs value.value;
           description = "RON named struct of ${
-            lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+            types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
           }";
           descriptionClass = "composite";
-          functor = lib.defaultFunctor name // {
+          functor = defaultFunctor name // {
             binOp =
               a: b:
               let
@@ -344,8 +382,8 @@ in
             type = payload: ronNamedStructOf' payload.elemType;
             wrappedDeprecationMessage =
               { loc }:
-              lib.warn ''
-                The deprecated `type.functor.wrapped` attribute of the option `${lib.showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
+              warn ''
+                The deprecated `type.functor.wrapped` attribute of the option `${showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
               '' elemType;
           };
           inherit (elemType) getSubModules;
@@ -355,7 +393,7 @@ in
             let
               pushPositions = map (
                 def:
-                builtins.mapAttrs (_n: v: {
+                mapAttrs (_n: v: {
                   inherit (def) file;
                   value = v;
                 }) def.value.value
@@ -364,28 +402,28 @@ in
             {
               __type = "namedStruct";
               name =
-                if builtins.length defs == 0 then
+                if length defs == 0 then
                   abort "This case should not happen."
-                else if builtins.length defs == 1 then
-                  (builtins.head defs).value.name
+                else if length defs == 1 then
+                  (head defs).value.name
                 else
-                  builtins.foldl' (
+                  foldl' (
                     first: def:
                     if def.value.name != first.value.name then
-                      throw "The option '${lib.showOption loc}' has conflicting definition values: ${
-                        lib.options.showDefs [
+                      throw "The option '${showOption loc}' has conflicting definition values: ${
+                        showDefs [
                           first
                           def
                         ]
                       }"
                     else
                       first.value.name
-                  ) (builtins.head defs) (builtins.tail defs);
-              value = builtins.mapAttrs (_n: v: v.value) (
-                lib.filterAttrs (_n: v: v ? value) (
-                  builtins.zipAttrsWith (
-                    name: defs: (lib.mergeDefinitions (loc ++ [ name ]) elemType defs).optionalValue
-                  ) (pushPositions defs)
+                  ) (head defs) (tail defs);
+              value = mapAttrs (_n: v: v.value) (
+                filterAttrs (_n: v: v ? value) (
+                  zipAttrsWith (name: defs: (mergeDefinitions (loc ++ [ name ]) elemType defs).optionalValue) (
+                    pushPositions defs
+                  )
                 )
               );
             };
@@ -396,24 +434,24 @@ in
     in
     ronNamedStructOf';
 
-  ronOptional = lib.mkOptionType {
+  ronOptional = mkOptionType {
     check =
       value:
       let
-        keys = builtins.attrNames value;
+        keys = attrNames value;
       in
-      builtins.isAttrs value
+      isAttrs value
       &&
         [
           "__type"
           "value"
         ] == keys
       && value.__type == "optional"
-      && !builtins.isFunction value.value
-      && !builtins.isPath value.value;
+      && !isFunction value.value
+      && !isPath value.value;
     description = "RON optional";
     descriptionClass = "noun";
-    merge = lib.options.mergeEqualOption;
+    merge = mergeEqualOption;
     name = "ronOptional";
   };
 
@@ -424,26 +462,26 @@ in
           name = "ronOptionalOf";
         in
         elemType:
-        lib.mkOptionType {
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
                 "value"
               ] == keys
             && value.__type == "optional"
-            && !builtins.isFunction value.value
-            && !builtins.isPath value.value;
+            && !isFunction value.value
+            && !isPath value.value;
           description = "RON optional of ${
-            lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+            types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
           }";
           descriptionClass = "composite";
-          functor = lib.defaultFunctor name // {
+          functor = defaultFunctor name // {
             binOp =
               a: b:
               let
@@ -454,15 +492,15 @@ in
             type = payload: ronOptionalOf' payload.elemType;
             wrappedDeprecationMessage =
               { loc }:
-              lib.warn ''
-                The deprecated `type.functor.wrapped` attribute of the option `${lib.showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
+              warn ''
+                The deprecated `type.functor.wrapped` attribute of the option `${showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
               '' elemType;
           };
           inherit (elemType) getSubModules getSubOptions;
           merge = loc: defs: {
             __type = "optional";
             value =
-              (lib.mergeDefinitions loc (lib.types.nullOr elemType) (
+              (mergeDefinitions loc (types.nullOr elemType) (
                 map (def: {
                   inherit (def) file;
                   inherit (def.value) value;
@@ -483,22 +521,22 @@ in
         let
           name = "ronTuple";
         in
-        assert lib.assertMsg (size > 0) "The size must be greater than zero.";
-        lib.mkOptionType {
+        assert assertMsg (size > 0) "The size must be greater than zero.";
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
                 "value"
               ] == keys
             && value.__type == "tuple"
-            && builtins.isList value.value
-            && builtins.length value.value == size;
+            && isList value.value
+            && length value.value == size;
           description = "RON tuple";
           descriptionClass = "noun";
           emptyValue = {
@@ -507,7 +545,7 @@ in
               value = [ ];
             };
           };
-          functor = lib.defaultFunctor name // {
+          functor = defaultFunctor name // {
             payload = { inherit size; };
             type = payload: ronTuple' payload.size;
             binOp = a: b: {
@@ -516,7 +554,7 @@ in
           };
           merge = _loc: defs: {
             __type = "tuple";
-            value = builtins.concatLists (map (x: x.value.value) defs);
+            value = concatLists (map (x: x.value.value) defs);
           };
           inherit name;
         };
@@ -531,17 +569,15 @@ in
           show = v: ''"${v}"'';
         in
         variants: size:
-        assert lib.assertMsg (builtins.all (
-          value: builtins.isString value
-        ) variants) "All variants in the enum must be strings.";
-        assert lib.assertMsg (size > 0) "The size must be greater than zero.";
-        lib.mkOptionType {
+        assert assertMsg (all (value: isString value) variants) "All variants in the enum must be strings.";
+        assert assertMsg (size > 0) "The size must be greater than zero.";
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
@@ -549,30 +585,30 @@ in
                 "variant"
               ] == keys
             && value.__type == "enum"
-            && builtins.elem value.variant variants
-            && builtins.isList value.value
-            && builtins.length value.value == size;
+            && elem value.variant variants
+            && isList value.value
+            && length value.value == size;
           description =
             if variants == [ ] then
               "impossible (empty RON tuple enum)"
-            else if builtins.length variants == 1 then
-              "RON enum variant ${show (builtins.head variants)} with ${toString size} ${
+            else if length variants == 1 then
+              "RON enum variant ${show (head variants)} with ${toString size} ${
                 if size == 1 then "value (singular RON tuple enum)" else "values (singular RON tuple enum)"
               }"
             else
               "one of the following RON tuple enum variants: ${
-                lib.concatMapStringsSep ", " show variants
+                concatMapStringsSep ", " show variants
               } with a value";
-          descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
-          functor = lib.defaultFunctor name // {
+          descriptionClass = if length variants < 2 then "noun" else "conjunction";
+          functor = defaultFunctor name // {
             payload = { inherit size variants; };
             type = payload: ronTupleEnum' payload.variants payload.size;
             binOp = a: b: {
-              variants = lib.unique (a.variants + b.variants);
+              variants = unique (a.variants + b.variants);
               size = if a.size == b.size then a.size else throw "The tuple sizes do not match.";
             };
           };
-          merge = lib.options.mergeEqualOption;
+          merge = mergeEqualOption;
           inherit name;
         };
     in
@@ -586,17 +622,15 @@ in
           show = v: ''"${v}"'';
         in
         elemType: variants: size:
-        assert lib.assertMsg (builtins.all (
-          value: builtins.isString value
-        ) variants) "All variants in the enum must be strings.";
-        assert lib.assertMsg (size > 0) "The size must be greater than zero.";
-        lib.mkOptionType {
+        assert assertMsg (all (value: isString value) variants) "All variants in the enum must be strings.";
+        assert assertMsg (size > 0) "The size must be greater than zero.";
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
@@ -604,28 +638,28 @@ in
                 "variant"
               ] == keys
             && value.__type == "enum"
-            && builtins.elem value.variant variants
-            && builtins.isList value.value
-            && builtins.length value.value == size;
+            && elem value.variant variants
+            && isList value.value
+            && length value.value == size;
           description =
             if variants == [ ] then
               "impossible (empty RON tuple enum)"
-            else if builtins.length variants == 1 then
-              "RON enum variant ${show (builtins.head variants)} with ${toString size} ${
-                lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+            else if length variants == 1 then
+              "RON enum variant ${show (head variants)} with ${toString size} ${
+                types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
               } ${if size == 1 then "value (singular RON tuple enum)" else "values (singular RON tuple enum)"}"
             else
               "one of the following RON tuple enum variants: ${
-                lib.concatMapStringsSep ", " show variants
+                concatMapStringsSep ", " show variants
               } with ${toString size} ${
-                lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+                types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
               } ${if size == 1 then "value" else "values"}";
-          descriptionClass = if builtins.length variants < 2 then "noun" else "conjunction";
-          functor = lib.defaultFunctor name // {
+          descriptionClass = if length variants < 2 then "noun" else "conjunction";
+          functor = defaultFunctor name // {
             payload = { inherit elemType size variants; };
             type = payload: ronTupleEnumOf' payload.elemType payload.variants payload.size;
             binOp = a: b: {
-              variants = lib.unique (a.variants + b.variants);
+              variants = unique (a.variants + b.variants);
               elemType = a.elemType.typeMerge b.elemType.functor;
               size = if a.size == b.size then a.size else throw "The tuple sizes do not match.";
             };
@@ -635,13 +669,13 @@ in
           merge = loc: defs: {
             __type = "enum";
             value = map (x: x.value) (
-              builtins.filter (x: x ? value) (
-                builtins.concatLists (
-                  lib.imap1 (
+              filter (x: x ? value) (
+                concatLists (
+                  imap1 (
                     n: def:
-                    lib.imap1 (
+                    imap1 (
                       m: def':
-                      (lib.mergeDefinitions (loc ++ [ "[definition ${toString n}-entry ${toString m}]" ]) elemType [
+                      (mergeDefinitions (loc ++ [ "[definition ${toString n}-entry ${toString m}]" ]) elemType [
                         {
                           inherit (def) file;
                           value = def';
@@ -653,23 +687,23 @@ in
               )
             );
             variant =
-              if builtins.length defs == 0 then
+              if length defs == 0 then
                 abort "This case should not happen."
-              else if builtins.length defs == 1 then
-                (builtins.head defs).value.variant
+              else if length defs == 1 then
+                (head defs).value.variant
               else
-                builtins.foldl' (
+                foldl' (
                   first: def:
                   if def.value.variant != first.value.variant then
-                    throw "The option '${lib.showOption (loc ++ [ "variant" ])}' has conflicting definition values: ${
-                      lib.options.showDefs [
+                    throw "The option '${showOption (loc ++ [ "variant" ])}' has conflicting definition values: ${
+                      showDefs [
                         first
                         def
                       ]
                     }"
                   else
                     first.value.variant
-                ) (builtins.head defs) (builtins.tail defs);
+                ) (head defs) (tail defs);
           };
           inherit name;
           nestedTypes.elemType = elemType;
@@ -685,24 +719,24 @@ in
           name = "ronTupleOf";
         in
         elemType: size:
-        assert lib.assertMsg (size > 0) "The size must be greater than zero.";
-        lib.mkOptionType {
+        assert assertMsg (size > 0) "The size must be greater than zero.";
+        mkOptionType {
           check =
             value:
             let
-              keys = builtins.attrNames value;
+              keys = attrNames value;
             in
-            builtins.isAttrs value
+            isAttrs value
             &&
               [
                 "__type"
                 "value"
               ] == keys
             && value.__type == "tuple"
-            && builtins.isList value.value
-            && builtins.length value.value == size;
+            && isList value.value
+            && length value.value == size;
           description = "RON tuple of ${
-            lib.types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
+            types.optionDescriptionPhrase (class: class == "noun" || class == "composite") elemType
           } with a fixed-size of ${toString size} elements";
           descriptionClass = "composite";
           emptyValue = {
@@ -711,7 +745,7 @@ in
               value = [ ];
             };
           };
-          functor = lib.defaultFunctor name // {
+          functor = defaultFunctor name // {
             binOp =
               a: b:
               let
@@ -728,8 +762,8 @@ in
             type = payload: ronTupleOf' payload.elemType payload.size;
             wrappedDeprecationMessage =
               { loc }:
-              lib.warn ''
-                The deprecated `type.functor.wrapped` attribute of the option `${lib.showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
+              warn ''
+                The deprecated `type.functor.wrapped` attribute of the option `${showOption loc}` is accessed, use `type.nestedTypes.elemType` instead.
               '' elemType;
           };
           inherit (elemType) getSubModules;
@@ -737,13 +771,13 @@ in
           merge = loc: defs: {
             __type = "tuple";
             value = map (x: x.value) (
-              builtins.filter (x: x ? value) (
-                builtins.concatLists (
-                  lib.imap1 (
+              filter (x: x ? value) (
+                concatLists (
+                  imap1 (
                     n: def:
-                    lib.imap1 (
+                    imap1 (
                       m: def':
-                      (lib.mergeDefinitions (loc ++ [ "[definition ${toString n}-entry ${toString m}]" ]) elemType [
+                      (mergeDefinitions (loc ++ [ "[definition ${toString n}-entry ${toString m}]" ]) elemType [
                         {
                           inherit (def) file;
                           value = def';
@@ -761,4 +795,103 @@ in
         };
     in
     ronTupleOf';
+
+  rustToNixType =
+    let
+      rustToNixType' =
+        type:
+        let
+          handleOption =
+            type:
+            let
+              matches = match "Option<(.*)>" type;
+              innerType = if matches != null then head matches else null;
+            in
+            if matches != null then types.ronOptionalOf (rustToNixType' innerType) else null;
+          handleVec =
+            type:
+            let
+              matches = match "Vec<(.*)>" type;
+              innerType = if matches != null then head matches else null;
+            in
+            if matches != null then types.listOf (rustToNixType' innerType) else null;
+          handleArray =
+            type:
+            let
+              matches = match "[[]([^;]+); *([0-9]+)[]]" type;
+              innerType = if matches != null then head matches else null;
+              size = if matches != null then elemAt matches 1 else null;
+            in
+            if matches != null then types.ronArrayOf (rustToNixType' innerType) (fromJSON size) else null;
+          handleTuple =
+            type:
+            let
+              innerTypes =
+                if (match "\\((.*?)\\)" type) != null then
+                  let
+                    inner = head (match "\\((.*?)\\)" type);
+                    types = map trim (splitString "," inner);
+                  in
+                  filter (x: x != "") types
+                else
+                  null;
+            in
+            if innerTypes != null then
+              if length innerTypes == 1 then
+                types.ronTupleOf (rustToNixType' (head innerTypes)) 1
+              else
+                with types; ronTupleOf (oneOf (map rustToNixType' innerTypes)) (length innerTypes)
+            else
+              null;
+          handleMap =
+            type:
+            let
+              hashMapMatches = match "HashMap<([^,]*),([^>]*)>" type;
+              btreeMapMatches = match "BTreeMap<([^,]*),([^>]*)>" type;
+
+              matches =
+                if hashMapMatches != null then
+                  hashMapMatches
+                else if btreeMapMatches != null then
+                  btreeMapMatches
+                else
+                  null;
+              valueType = if matches != null then head (tail matches) else null;
+            in
+            if matches != null then types.ronMapOf (rustToNixType' valueType) else null;
+        in
+        if handleOption type != null then
+          handleOption type
+        else if handleVec type != null then
+          handleVec type
+        else if handleArray type != null then
+          handleArray type
+        else if handleTuple type != null then
+          handleTuple type
+        else if handleMap type != null then
+          handleMap type
+        else
+          {
+            "&str" = types.str;
+            "bool" = types.bool;
+            "char" = types.ronChar;
+            "f32" = types.float;
+            "f64" = types.float;
+            "i8" = types.ints.s8;
+            "i16" = types.ints.s16;
+            "i32" = types.ints.s32;
+            "i64" = types.int;
+            "i128" = types.int;
+            "isize" = types.int;
+            "String" = types.str;
+            "u8" = types.ints.u8;
+            "u16" = types.ints.u16;
+            "u32" = types.ints.u32;
+            "u64" = types.ints.unsigned;
+            "u128" = types.ints.unsigned;
+            "usize" = types.ints.unsigned;
+          }
+          .${trim type} or (throw "Unsupported type: ${type}");
+    in
+    rustToNixType';
 }

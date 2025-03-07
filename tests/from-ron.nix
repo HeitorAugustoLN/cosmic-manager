@@ -2,7 +2,7 @@
 let
   results = lib.runTests {
     testFromRonAll = {
-      expr = lib.cosmic.generators.fromRON ''
+      expr = lib.cosmic.ron.fromRON ''
         AllTests(
           bool: true,
           char: 'a',
@@ -132,12 +132,12 @@ let
     };
 
     testFromRonBool = {
-      expr = lib.cosmic.generators.fromRON "true";
+      expr = lib.cosmic.ron.fromRON "true";
       expected = true;
     };
 
     testFromRonChar = {
-      expr = lib.cosmic.generators.fromRON "'a'";
+      expr = lib.cosmic.ron.fromRON "'a'";
 
       expected = {
         __type = "char";
@@ -146,7 +146,7 @@ let
     };
 
     testFromRonEnum = {
-      expr = lib.cosmic.generators.fromRON "FooBar";
+      expr = lib.cosmic.ron.fromRON "FooBar";
       # Simple enum variants are basically the same as raw values. So I didn't
       # bother to add a special case for them in the fromRON function.
       expected = {
@@ -156,17 +156,17 @@ let
     };
 
     testFromRonFloat = {
-      expr = lib.cosmic.generators.fromRON "3.14";
+      expr = lib.cosmic.ron.fromRON "3.14";
       expected = 3.14;
     };
 
     testFromRonInt = {
-      expr = lib.cosmic.generators.fromRON "333";
+      expr = lib.cosmic.ron.fromRON "333";
       expected = 333;
     };
 
     testFromRonList = {
-      expr = lib.cosmic.generators.fromRON ''
+      expr = lib.cosmic.ron.fromRON ''
         [
           "foo",
           "bar",
@@ -182,7 +182,7 @@ let
     };
 
     testFromRonMap = {
-      expr = lib.cosmic.generators.fromRON ''
+      expr = lib.cosmic.ron.fromRON ''
         {
           "foo": (bar: "baz")
         }
@@ -202,7 +202,7 @@ let
     };
 
     testFromRonNamedStruct = {
-      expr = lib.cosmic.generators.fromRON ''
+      expr = lib.cosmic.ron.fromRON ''
         foo(
           bar: "baz"
         )
@@ -218,7 +218,7 @@ let
     };
 
     testFromRonOptional = {
-      expr = lib.cosmic.generators.fromRON ''Some("foo")'';
+      expr = lib.cosmic.ron.fromRON ''Some("foo")'';
 
       expected = {
         __type = "optional";
@@ -227,7 +227,7 @@ let
     };
 
     testFromRonRaw = {
-      expr = lib.cosmic.generators.fromRON "foo";
+      expr = lib.cosmic.ron.fromRON "foo";
       expected = {
         __type = "raw";
         value = "foo";
@@ -235,17 +235,17 @@ let
     };
 
     testFromRonString = {
-      expr = lib.cosmic.generators.fromRON ''"foo"'';
+      expr = lib.cosmic.ron.fromRON ''"foo"'';
       expected = "foo";
     };
 
     testFromRonStruct = {
-      expr = lib.cosmic.generators.fromRON ''( a: (b: (c: "foo")))'';
+      expr = lib.cosmic.ron.fromRON ''( a: (b: (c: "foo")))'';
       expected.a.b.c = "foo";
     };
 
     testFromRonTuple = {
-      expr = lib.cosmic.generators.fromRON ''("foo", "bar", "baz", 3.14, 333)'';
+      expr = lib.cosmic.ron.fromRON ''("foo", "bar", "baz", 3.14, 333)'';
       expected = {
         __type = "tuple";
         value = [
@@ -259,7 +259,7 @@ let
     };
 
     testToRonTupleEnum = {
-      expr = lib.cosmic.generators.fromRON ''Path("/some/path", "/another/path")'';
+      expr = lib.cosmic.ron.fromRON ''Path("/some/path", "/another/path")'';
       expected = {
         __type = "enum";
         variant = "Path";

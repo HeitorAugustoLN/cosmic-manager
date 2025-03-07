@@ -10,7 +10,6 @@ let
     mapAttrs
     stringLength
     ;
-
   inherit (lib)
     importJSON
     init
@@ -24,13 +23,8 @@ let
     types
     unique
     ;
-
-  inherit (lib.cosmic)
-    cleanNullsExceptOptional
-    defaultNullOpts
-    mkRonExpression
-    rustToNixType
-    ;
+  inherit (lib.cosmic) cleanNullsExceptOptional defaultNullOpts mkRONExpression;
+  inherit (lib.types) rustToNixType;
 in
 {
   options.wayland.desktopManager.cosmic.shortcuts =
@@ -114,7 +108,7 @@ in
                         )
                   )
                 );
-              example = mkRonExpression 0 {
+              example = mkRONExpression 0 {
                 __type = "enum";
                 variant = "Spawn";
                 value = [ "firefox" ];

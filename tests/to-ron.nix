@@ -2,7 +2,7 @@
 let
   results = lib.runTests {
     testToRonAll = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         bool = true;
         char = {
           __type = "char";
@@ -96,33 +96,33 @@ let
         )'';
     };
     testToRonBool = {
-      expr = lib.cosmic.generators.toRON 0 true;
+      expr = lib.cosmic.ron.toRON 0 true;
       expected = "true";
     };
     testToRonChar = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "char";
         value = "a";
       };
       expected = "'a'";
     };
     testToRonEnum = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "enum";
         variant = "FooBar";
       };
       expected = "FooBar";
     };
     testToRonFloat = {
-      expr = lib.cosmic.generators.toRON 0 3.14;
+      expr = lib.cosmic.ron.toRON 0 3.14;
       expected = "3.14";
     };
     testToRonInt = {
-      expr = lib.cosmic.generators.toRON 0 333;
+      expr = lib.cosmic.ron.toRON 0 333;
       expected = "333";
     };
     testToRonList = {
-      expr = lib.cosmic.generators.toRON 0 [
+      expr = lib.cosmic.ron.toRON 0 [
         "foo"
         "bar"
         "baz"
@@ -135,7 +135,7 @@ let
         ]'';
     };
     testToRonMap = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "map";
         value = [
           {
@@ -150,7 +150,7 @@ let
         }'';
     };
     testToRonNamedStruct = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "namedStruct";
         name = "foo";
         value = {
@@ -163,25 +163,25 @@ let
         )'';
     };
     testToRonOptional = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "optional";
         value = "foo";
       };
       expected = ''Some("foo")'';
     };
     testToRonRaw = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "raw";
         value = "foo";
       };
       expected = "foo";
     };
     testToRonString = {
-      expr = lib.cosmic.generators.toRON 0 "foo";
+      expr = lib.cosmic.ron.toRON 0 "foo";
       expected = ''"foo"'';
     };
     testToRonStruct = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         foo = "bar";
       };
       expected = ''
@@ -190,7 +190,7 @@ let
         )'';
     };
     testToRonTuple = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "tuple";
         value = [
           "foo"
@@ -206,7 +206,7 @@ let
         )'';
     };
     testToRonTupleEnum = {
-      expr = lib.cosmic.generators.toRON 0 {
+      expr = lib.cosmic.ron.toRON 0 {
         __type = "enum";
         variant = "FooBar";
         value = [ "baz" ];

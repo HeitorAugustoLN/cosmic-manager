@@ -6,7 +6,7 @@
 
       wallpapersSubmodule =
         let
-          inherit (lib.cosmic) mkRonExpression;
+          inherit (lib.cosmic) mkRONExpression;
         in
         lib.types.submodule {
           freeformType = with lib.types; attrsOf anything;
@@ -27,7 +27,7 @@
                   "Linear"
                   "Nearest"
                 ]);
-              example = mkRonExpression 0 {
+              example = mkRONExpression 0 {
                 __type = "enum";
                 variant = "Lanczos";
               } null;
@@ -56,7 +56,7 @@
                   "Alphanumeric"
                   "Random"
                 ]);
-              example = mkRonExpression 0 {
+              example = mkRONExpression 0 {
                 __type = "enum";
                 variant = "Alphanumeric";
               } null;
@@ -74,7 +74,7 @@
                     "Zoom"
                   ]) (ronTupleEnumOf (ronTupleOf (maybeRonRaw (numbers.between 0.0 1.0)) 3) [ "Fit" ] 1)
                 );
-              example = mkRonExpression 0 {
+              example = mkRONExpression 0 {
                 __type = "enum";
                 variant = "Fit";
                 value = [
@@ -102,7 +102,7 @@
                       type =
                         with lib.types;
                         maybeRonRaw (listOf (maybeRonRaw (ronTupleOf (maybeRonRaw (numbers.between 0.0 1.0)) 3)));
-                      example = mkRonExpression 0 [
+                      example = mkRONExpression 0 [
                         {
                           __type = "tuple";
                           value = [
@@ -142,7 +142,7 @@
                       )) [ "Color" ] 1
                     )
                   );
-                example = mkRonExpression 0 {
+                example = mkRONExpression 0 {
                   __type = "enum";
                   variant = "Color";
                   value = [
