@@ -138,8 +138,8 @@ in
     let
       processDefaultNullArgs =
         args:
-        assert mkAssertion "defaultNullOpts" (args ? default) "unexpected argument `default`.";
-        assert mkAssertion "defaultNullOpts" (args ? defaultText) "unexpected argument `defaultText`.";
+        assert mkAssertion "defaultNullOpts" (!(args ? default)) "unexpected argument `default`.";
+        assert mkAssertion "defaultNullOpts" (!(args ? defaultText)) "unexpected argument `defaultText`.";
         args // { default = null; };
 
       mkAttrs' = args: mkNullableWithRaw' (args // { type = types.attrs; });

@@ -1,8 +1,17 @@
 { lib, ... }:
 let
-  inherit (lib.cosmic) defaultNullOpts;
+  inherit (builtins) filter length;
+  inherit (lib)
+    imap0
+    mkIf
+    mkMerge
+    mkOption
+    types
+    ;
+  inherit (lib.cosmic) defaultNullOpts mkCosmicApplication mkThrow;
+  inherit (lib.lists) findFirstIndex;
 in
-lib.cosmic.applications.mkCosmicApplication {
+mkCosmicApplication {
   name = "cosmic-term";
   originalName = "COSMIC Terminal Emulator";
   identifier = "com.system76.CosmicTerm";
@@ -62,7 +71,7 @@ lib.cosmic.applications.mkCosmicApplication {
       Specifies the weight of normal text characters in the terminal.
     '';
 
-    opacity = defaultNullOpts.mkNullableWithRaw (lib.types.ints.between 0 100) 100 ''
+    opacity = defaultNullOpts.mkNullableWithRaw (types.ints.between 0 100) 100 ''
       Specifies the opacity of the terminal background.
     '';
 
@@ -104,8 +113,8 @@ lib.cosmic.applications.mkCosmicApplication {
   extraOptions = {
     profiles =
       let
-        profileSubmodule = lib.types.submodule {
-          freeformType = with lib.types; attrsOf anything;
+        profileSubmodule = types.submodule {
+          freeformType = with types; attrsOf anything;
           options = {
             command = defaultNullOpts.mkStr' {
               example = "bash";
@@ -115,37 +124,37 @@ lib.cosmic.applications.mkCosmicApplication {
               '';
               apply = toString;
             };
-            hold = lib.mkOption {
-              type = lib.types.bool;
+            hold = mkOption {
+              type = types.bool;
               example = true;
               description = ''
                 Whether the terminal should continue running after the command exits.
               '';
             };
-            is_default = lib.mkOption {
-              type = lib.types.bool;
+            is_default = mkOption {
+              type = types.bool;
               default = false;
               example = true;
               description = ''
                 Whether the profile is the default.
               '';
             };
-            name = lib.mkOption {
-              type = lib.types.str;
+            name = mkOption {
+              type = types.str;
               description = ''
                 The name of the profile.
               '';
               example = "Default";
             };
-            syntax_theme_dark = lib.mkOption {
-              type = lib.types.str;
+            syntax_theme_dark = mkOption {
+              type = types.str;
               description = ''
                 Specifies the color scheme used for syntax highlighting in dark mode for this profile.
               '';
               example = "COSMIC Dark";
             };
-            syntax_theme_light = lib.mkOption {
-              type = lib.types.str;
+            syntax_theme_light = mkOption {
+              type = types.str;
               description = ''
                 Specifies the color scheme used for syntax highlighting in light mode for this profile.
               '';
@@ -171,7 +180,7 @@ lib.cosmic.applications.mkCosmicApplication {
         };
       in
       defaultNullOpts.mkNullable' {
-        type = lib.types.listOf profileSubmodule;
+        type = types.listOf profileSubmodule;
         example = [
           {
             command = "bash";
@@ -199,12 +208,12 @@ lib.cosmic.applications.mkCosmicApplication {
         apply =
           profiles:
           let
-            defaultProfiles = builtins.filter (profile: profile.is_default) profiles;
+            defaultProfiles = filter (profile: profile.is_default) profiles;
           in
-          if builtins.length defaultProfiles > 1 then
-            throw "Only one profile can be the default."
-          else if builtins.length defaultProfiles < 1 then
-            throw "At least one profile must be the default."
+          if length defaultProfiles > 1 then
+            mkThrow "cosmic-term" "Only one profile can be the default."
+          else if length defaultProfiles < 1 then
+            mkThrow "cosmic-term" "At least one profile must be the default."
           else
             profiles;
       };
@@ -213,60 +222,60 @@ lib.cosmic.applications.mkCosmicApplication {
       let
         mkColorsSubmodule =
           scope:
-          lib.types.submodule {
-            freeformType = with lib.types; attrsOf anything;
+          types.submodule {
+            freeformType = with types; attrsOf anything;
             options = {
-              black = lib.mkOption {
-                type = lib.types.hexColor;
+              black = mkOption {
+                type = types.hexColor;
                 description = ''
                   The black color of ${scope} colors.
                 '';
                 example = "#000000";
               };
-              blue = lib.mkOption {
-                type = lib.types.hexColor;
+              blue = mkOption {
+                type = types.hexColor;
                 description = ''
                   The blue color of ${scope} colors.
                 '';
                 example = "#0000FF";
               };
-              cyan = lib.mkOption {
-                type = lib.types.hexColor;
+              cyan = mkOption {
+                type = types.hexColor;
                 description = ''
                   The cyan color of ${scope} colors.
                 '';
                 example = "#00FFFF";
               };
-              green = lib.mkOption {
-                type = lib.types.hexColor;
+              green = mkOption {
+                type = types.hexColor;
                 description = ''
                   The green color of ${scope} colors.
                 '';
                 example = "#00FF00";
               };
-              magenta = lib.mkOption {
-                type = lib.types.hexColor;
+              magenta = mkOption {
+                type = types.hexColor;
                 description = ''
                   The magenta color of ${scope} colors.
                 '';
                 example = "#FF00FF";
               };
-              red = lib.mkOption {
-                type = lib.types.hexColor;
+              red = mkOption {
+                type = types.hexColor;
                 description = ''
                   The red color of ${scope} colors.
                 '';
                 example = "#FF0000";
               };
-              white = lib.mkOption {
-                type = lib.types.hexColor;
+              white = mkOption {
+                type = types.hexColor;
                 description = ''
                   The white color of ${scope} colors.
                 '';
                 example = "#FFFFFF";
               };
-              yellow = lib.mkOption {
-                type = lib.types.hexColor;
+              yellow = mkOption {
+                type = types.hexColor;
                 description = ''
                   The yellow color of ${scope} colors.
                 '';
@@ -274,51 +283,51 @@ lib.cosmic.applications.mkCosmicApplication {
               };
             };
           };
-        colorSchemeSubmodule = lib.types.submodule {
-          freeformType = with lib.types; attrsOf anything;
+        colorSchemeSubmodule = types.submodule {
+          freeformType = with types; attrsOf anything;
           options = {
-            bright = lib.mkOption {
+            bright = mkOption {
               type = mkColorsSubmodule "bright";
               description = ''
                 The bright colors of the terminal.
               '';
             };
-            bright_foreground = lib.mkOption {
-              type = lib.types.hexColor;
+            bright_foreground = mkOption {
+              type = types.hexColor;
               description = ''
                 The bright foreground color of the terminal.
               '';
               example = "#FFFFFF";
             };
-            cursor = lib.mkOption {
-              type = lib.types.hexColor;
+            cursor = mkOption {
+              type = types.hexColor;
               description = ''
                 The color of the terminal cursor.
               '';
               example = "#FFFFFF";
             };
-            dim = lib.mkOption {
+            dim = mkOption {
               type = mkColorsSubmodule "dim";
               description = ''
                 The dim colors of the terminal.
               '';
             };
-            dim_foreground = lib.mkOption {
-              type = lib.types.hexColor;
+            dim_foreground = mkOption {
+              type = types.hexColor;
               description = ''
                 The dim foreground color of the terminal.
               '';
               example = "#FFFFFF";
             };
-            foreground = lib.mkOption {
-              type = lib.types.hexColor;
+            foreground = mkOption {
+              type = types.hexColor;
               description = ''
                 The foreground color of the terminal.
               '';
               example = "#FFFFFF";
             };
-            mode = lib.mkOption {
-              type = lib.types.enum [
+            mode = mkOption {
+              type = types.enum [
                 "dark"
                 "light"
               ];
@@ -327,14 +336,14 @@ lib.cosmic.applications.mkCosmicApplication {
               '';
               example = "dark";
             };
-            name = lib.mkOption {
-              type = lib.types.str;
+            name = mkOption {
+              type = types.str;
               description = ''
                 The name of the colorscheme.
               '';
               example = "Catppuccin Mocha";
             };
-            normal = lib.mkOption {
+            normal = mkOption {
               type = mkColorsSubmodule "normal";
               description = ''
                 The normal colors of the terminal.
@@ -344,7 +353,7 @@ lib.cosmic.applications.mkCosmicApplication {
         };
       in
       defaultNullOpts.mkNullable' {
-        type = lib.types.listOf colorSchemeSubmodule;
+        type = types.listOf colorSchemeSubmodule;
         example = [
           {
             mode = "dark";
@@ -392,35 +401,37 @@ lib.cosmic.applications.mkCosmicApplication {
   };
 
   extraConfig = cfg: {
-    wayland.desktopManager.cosmic.configFile."com.system76.CosmicTerm".entries = lib.mkMerge [
-      (lib.mkIf (cfg.profiles != null) {
+    wayland.desktopManager.cosmic.configFile."com.system76.CosmicTerm".entries = mkMerge [
+      (mkIf (cfg.profiles != null) {
         default_profile = {
           __type = "optional";
-          value = lib.lists.findFirstIndex (profile: profile.is_default) null cfg.profiles;
+          value = findFirstIndex (profile: profile.is_default) null cfg.profiles;
         };
+
         profiles = {
           __type = "map";
-          value = lib.imap0 (index: profile: {
+          value = imap0 (index: profile: {
             key = index;
-            value = builtins.removeAttrs profile [ "is_default" ];
+            value = removeAttrs profile [ "is_default" ];
           }) cfg.profiles;
         };
       })
 
-      (lib.mkIf (cfg.colorSchemes != null) {
+      (mkIf (cfg.colorSchemes != null) {
         color_schemes_dark = {
           __type = "map";
-          value = lib.imap0 (index: colorscheme: {
+          value = imap0 (index: colorscheme: {
             key = index;
-            value = builtins.removeAttrs colorscheme [ "mode" ];
-          }) (builtins.filter (colorscheme: colorscheme.mode == "dark") cfg.colorSchemes);
+            value = removeAttrs colorscheme [ "mode" ];
+          }) (filter (colorscheme: colorscheme.mode == "dark") cfg.colorSchemes);
         };
+
         color_schemes_light = {
           __type = "map";
-          value = lib.imap0 (index: colorscheme: {
+          value = imap0 (index: colorscheme: {
             key = index;
-            value = builtins.removeAttrs colorscheme [ "mode" ];
-          }) (builtins.filter (colorscheme: colorscheme.mode == "light") cfg.colorSchemes);
+            value = removeAttrs colorscheme [ "mode" ];
+          }) (filter (colorscheme: colorscheme.mode == "light") cfg.colorSchemes);
         };
       })
     ];
