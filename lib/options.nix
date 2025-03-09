@@ -12,13 +12,17 @@ let
     toJSON
     ;
   inherit (lib)
-    assertMsg
     literalExpression
     mkOption
     optionalAttrs
     types
     ;
-  inherit (lib.cosmic) isRONType mkRON;
+  inherit (lib.cosmic)
+    isRONType
+    mkAssertion
+    mkRON
+    mkThrow
+    ;
   inherit (lib.generators) toPretty;
   inherit (lib.strings) replicate;
 
@@ -74,7 +78,7 @@ let
               else
                 toRONExpression "enum" value.variant
             else
-              throw "lib.cosmic.mkRONExpression: enum type must have at least a variant key."
+              mkThrow "mkRONExpression" "enum type must have at least a variant key."
           else if value.__type == "namedStruct" then
             if value ? name && value ? value then
               toRONExpression "namedStruct" {
@@ -82,7 +86,7 @@ let
                 value = mapAttrs (_: v: mkRONExpression' nextIndent v "namedStruct") value.value;
               }
             else
-              throw "lib.cosmic.mkRONExpression: namedStruct type must have name and value keys."
+              mkThrow "mkRONExpression" "namedStruct type must have name and value keys."
           else if isRONType value.value then
             toRONExpression value.__type (mkRONExpression' startIndent value.value value.__type)
           else if isList value.value then
@@ -134,12 +138,8 @@ in
     let
       processDefaultNullArgs =
         args:
-        assert
-          args ? default
-          -> abort "defaultNullOpts: unexpected argument `default`. Did you mean `pluginDefault`?";
-        assert
-          args ? defaultText
-          -> abort "defaultNullOpts: unexpected argument `defaultText`. Did you mean `pluginDefault`?";
+        assert mkAssertion "defaultNullOpts" (args ? default) "unexpected argument `default`.";
+        assert mkAssertion "defaultNullOpts" (args ? defaultText) "unexpected argument `defaultText`.";
         args // { default = null; };
 
       mkAttrs' = args: mkNullableWithRaw' (args // { type = types.attrs; });
@@ -151,7 +151,7 @@ in
 
       mkEnum' =
         { variants, ... }@args:
-        assert assertMsg (isList variants) "mkEnum': `variants` must be a list";
+        assert mkAssertion "defaultNullOpts.mkEnum'" (isList variants) "`variants` must be a list";
         mkNullableWithRaw' (removeAttrs args [ "variants" ] // { type = types.enum variants; });
 
       mkFloat' = args: mkNullableWithRaw' (args // { type = types.float; });
@@ -197,7 +197,7 @@ in
 
       mkRonArrayOf' =
         { size, type, ... }@args:
-        assert assertMsg (isInt size) "mkRonArrayOf': `size` must be an integer";
+        assert mkAssertion "defaultNullOpts.mkRonArrayOf'" (isInt size) "`size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {
@@ -209,7 +209,7 @@ in
 
       mkRonEnum' =
         { variants, ... }@args:
-        assert assertMsg (isList variants) "mkRonEnum': `variants` must be a list";
+        assert mkAssertion "defaultNullOpts.mkRonEnum'" (isList variants) "`variants` must be a list";
         mkNullableWithRaw' (removeAttrs args [ "variants" ] // { type = types.ronEnum variants; });
 
       mkRonMap' = args: mkNullableWithRaw' (args // { type = types.ronMap; });
@@ -232,13 +232,13 @@ in
 
       mkRonTuple' =
         { size, ... }@args:
-        assert assertMsg (isInt size) "mkRonTuple': `size` must be an integer";
+        assert mkAssertion "defaultNullOpts.mkRonTuple'" (isInt size) "`size` must be an integer";
         mkNullableWithRaw' (removeAttrs args [ "size" ] // { type = types.ronTuple size; });
 
       mkRonTupleEnum' =
         { size, variants, ... }@args:
-        assert assertMsg (isList variants) "mkRonTupleEnum': `variants` must be a list";
-        assert assertMsg (isInt size) "mkRonTupleEnum': `size` must be an integer";
+        assert mkAssertion "defaultNullOpts.mkRonTupleEnum'" (isList variants) "`variants` must be a list";
+        assert mkAssertion "defaultNullOpts.mkRonTupleEnum'" (isInt size) "`size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [
             "size"
@@ -256,8 +256,9 @@ in
           variants,
           ...
         }@args:
-        assert assertMsg (isList variants) "mkRonTupleEnumOf': `variants` must be a list";
-        assert assertMsg (isInt size) "mkRonTupleEnumOf': `size` must be an integer";
+        assert mkAssertion "defaultNullOpts.mkRonTupleEnumOf'" (isList variants)
+          "`variants` must be a list";
+        assert mkAssertion "defaultNullOpts.mkRonTupleEnumOf'" (isInt size) "`size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [
             "size"
@@ -270,7 +271,7 @@ in
 
       mkRonTupleOf' =
         { size, type, ... }@args:
-        assert assertMsg (isInt size) "mkRonTupleOf': `size` must be an integer";
+        assert mkAssertion "defaultNullOpts.mkRonTupleOf'" (isInt size) "`size` must be an integer";
         mkNullableWithRaw' (
           removeAttrs args [ "size" ]
           // {

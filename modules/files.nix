@@ -4,20 +4,42 @@
   pkgs,
   ...
 }:
+let
+  inherit (builtins) concatStringsSep length mapAttrs;
+  inherit (lib)
+    flatten
+    getExe
+    mapAttrsToList
+    mkEnableOption
+    mkIf
+    mkOption
+    optionalString
+    types
+    ;
+  inherit (lib.cosmic)
+    cleanNullsExceptOptional
+    mkAssertions
+    mkRONExpression
+    toRON
+    ;
+  inherit (lib.hm.dag) entryAfter entryBefore;
+in
 {
   options.wayland.desktopManager.cosmic = {
-    configFile = lib.mkOption {
-      type = with lib.types; attrsOf cosmicComponent;
+    configFile = mkOption {
+      type = with types; attrsOf cosmicComponent;
       default = { };
-      example = {
+      example = mkRONExpression 0 {
         "com.system76.CosmicComp" = {
           version = 1;
           entries = {
             autotile = true;
+
             autotile_behavior = {
               __type = "enum";
               variant = "PerWorkspace";
             };
+
             xkb_config = {
               rules = "";
               model = "";
@@ -32,12 +54,14 @@
             };
           };
         };
+
         "com.system76.CosmicSettings" = {
           version = 1;
           entries = {
             active-page = "wallpaper";
           };
         };
+
         "com.system76.CosmicTerm" = {
           version = 1;
           entries = {
@@ -45,7 +69,7 @@
             font_size = 16;
           };
         };
-      };
+      } null;
       description = ''
         Configuration files for COSMIC components stored in `$XDG_CONFIG_HOME`.
 
@@ -71,8 +95,8 @@
       '';
     };
 
-    dataFile = lib.mkOption {
-      type = with lib.types; attrsOf cosmicComponent;
+    dataFile = mkOption {
+      type = with types; attrsOf cosmicComponent;
       default = { };
       description = ''
         Data files for COSMIC components stored in `$XDG_DATA_HOME`.
@@ -99,10 +123,10 @@
       '';
     };
 
-    stateFile = lib.mkOption {
-      type = with lib.types; attrsOf cosmicComponent;
+    stateFile = mkOption {
+      type = with types; attrsOf cosmicComponent;
       default = { };
-      example = {
+      example = mkRONExpression 0 {
         "com.system76.CosmicBackground" = {
           version = 1;
           entries = {
@@ -121,7 +145,7 @@
             ];
           };
         };
-      };
+      } null;
       description = ''
         State files for COSMIC components stored in `$XDG_STATE_HOME`.
 
@@ -147,7 +171,7 @@
       '';
     };
 
-    resetFiles = lib.mkEnableOption "COSMIC configuration files reset" // {
+    resetFiles = mkEnableOption "COSMIC configuration files reset" // {
       description = ''
         Whether to enable COSMIC configuration files reset.
 
@@ -158,9 +182,9 @@
       '';
     };
 
-    resetFilesDirectories = lib.mkOption {
+    resetFilesDirectories = mkOption {
       type =
-        with lib.types;
+        with types;
         listOf (enum [
           "config"
           "data"
@@ -189,8 +213,8 @@
       '';
     };
 
-    resetFilesExclude = lib.mkOption {
-      type = with lib.types; listOf str;
+    resetFilesExclude = mkOption {
+      type = with types; listOf str;
       default = [ ];
       example = [
         "com.system76.CosmicComp"
@@ -213,17 +237,14 @@
       cfg = config.wayland.desktopManager.cosmic;
 
       makeOperations =
-        xdgDirectory: components:
-        lib.flatten (
-          lib.mapAttrsToList (component: details: {
-            inherit component;
+        xdg_directory: components:
+        flatten (
+          mapAttrsToList (component: details: {
+            inherit component xdg_directory;
             inherit (details) version;
-
             operation = "write";
-            xdg_directory = xdgDirectory;
-            entries = builtins.mapAttrs (_: value: lib.cosmic.ron.toRON 0 value) (
-              lib.cosmic.utils.cleanNullsExceptOptional details.entries
-            );
+
+            entries = mapAttrs (_: value: toRON 0 value) (cleanNullsExceptOptional details.entries);
           }) components
         );
 
@@ -238,26 +259,26 @@
       json = (pkgs.formats.json { }).generate "configurations.json" configurations;
     in
     {
-      assertions = [
+      assertions = mkAssertions "files" [
         {
-          assertion = cfg.resetFiles -> builtins.length cfg.resetFilesDirectories > 0;
+          assertion = cfg.resetFiles -> length cfg.resetFilesDirectories > 0;
           message = "At least one XDG directory must be selected to reset COSMIC files.";
         }
       ];
 
       home.activation =
         let
-          cosmic-ctl = lib.getExe config.programs.cosmic-ext-ctl.package;
+          cosmic-ctl = getExe config.programs.cosmic-ext-ctl.package;
         in
-        lib.mkIf cfg.enable {
-          configureCosmic = lib.hm.dag.entryAfter [ "writeBoundary" ] "run ${cosmic-ctl} apply ${json}";
+        mkIf cfg.enable {
+          configureCosmic = entryAfter [ "writeBoundary" ] "run ${cosmic-ctl} apply ${json}";
 
-          resetCosmic = lib.mkIf cfg.resetFiles (
-            lib.hm.dag.entryBefore [ "configureCosmic" ]
-              "run ${cosmic-ctl} reset --force --xdg-dirs ${builtins.concatStringsSep "," cfg.resetFilesDirectories} ${
-                lib.optionalString (
-                  builtins.length cfg.resetFilesExclude > 0
-                ) "--exclude ${builtins.concatStringsSep "," cfg.resetFilesExclude}"
+          resetCosmic = mkIf cfg.resetFiles (
+            entryBefore [ "configureCosmic" ]
+              "run ${cosmic-ctl} reset --force --xdg-dirs ${concatStringsSep "," cfg.resetFilesDirectories} ${
+                optionalString (
+                  length cfg.resetFilesExclude > 0
+                ) "--exclude ${concatStringsSep "," cfg.resetFilesExclude}"
               }"
           );
         };

@@ -1,4 +1,17 @@
 { lib, ... }:
+let
+  inherit (lib)
+    getAttrFromPath
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkPackageOption
+    optionalAttrs
+    optionals
+    setAttrByPath
+    ;
+  inherit (lib.cosmic) applyExtraConfig mkAssertions mkSettingsOption;
+in
 {
   mkCosmicApplication =
     {
@@ -31,20 +44,20 @@
           ...
         }:
         let
-          cfg = lib.getAttrFromPath loc config;
-          opts = lib.getAttrFromPath loc options;
+          cfg = getAttrFromPath loc config;
+          opts = getAttrFromPath loc options;
         in
         {
-          options = lib.setAttrByPath loc (
+          options = setAttrByPath loc (
             {
-              enable = lib.mkEnableOption originalName;
-              package = lib.mkPackageOption pkgs package {
+              enable = mkEnableOption originalName;
+              package = mkPackageOption pkgs package {
                 extraDescription = "Set to `null` if you don't want to install the package.";
                 nullable = true;
               };
             }
-            // lib.optionalAttrs hasSettings {
-              settings = lib.cosmic.options.mkSettingsOption {
+            // optionalAttrs hasSettings {
+              settings = mkSettingsOption {
                 description = settingsDescription;
                 example = settingsExample;
                 options = settingsOptions;
@@ -53,33 +66,31 @@
             // extraOptions
           );
 
-          config = lib.mkIf cfg.enable (
-            lib.mkMerge [
-              {
-                assertions = [
-                  {
-                    assertion = cfg.enable -> config.wayland.desktopManager.cosmic.enable;
-                    message = "COSMIC Desktop declarative configuration must be enabled to use ${originalName} module.";
-                  }
-                ];
+          config = mkIf cfg.enable (mkMerge [
+            {
+              assertions = mkAssertions name [
+                {
+                  assertion = cfg.enable -> config.wayland.desktopManager.cosmic.enable;
+                  message = "COSMIC Desktop declarative configuration must be enabled to use ${originalName} module.";
+                }
+              ];
 
-                home.packages = lib.optionals (cfg.package != null) [ cfg.package ];
-              }
+              home.packages = optionals (cfg.package != null) [ cfg.package ];
+            }
 
-              (lib.mkIf hasSettings {
-                wayland.desktopManager.cosmic = {
-                  configFile.${identifier} = {
-                    entries = cfg.settings;
-                    version = configurationVersion;
-                  };
+            (mkIf hasSettings {
+              wayland.desktopManager.cosmic = {
+                configFile.${identifier} = {
+                  entries = cfg.settings;
+                  version = configurationVersion;
                 };
-              })
+              };
+            })
 
-              (lib.mkIf (args ? extraConfig) (
-                lib.cosmic.modules.applyExtraConfig { inherit cfg extraConfig opts; }
-              ))
-            ]
-          );
+            (mkIf (args ? extraConfig) (applyExtraConfig {
+              inherit cfg extraConfig opts;
+            }))
+          ]);
 
           meta = {
             inherit maintainers;

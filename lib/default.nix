@@ -1,6 +1,6 @@
 { lib, ... }:
 let
-  inherit (lib) genAttrs makeExtensible warn;
+  inherit (lib) genAttrs makeExtensible;
 in
 makeExtensible (self: {
   applets = import ./applets.nix { inherit lib; };
@@ -12,7 +12,15 @@ makeExtensible (self: {
 
   inherit (self.applets) mkCosmicApplet;
   inherit (self.applications) mkCosmicApplication;
-  inherit (self.modules) applyExtraConfig;
+  inherit (self.modules)
+    applyExtraConfig
+    messagePrefix
+    mkAssertion
+    mkAssertions
+    mkThrow
+    mkWarning
+    mkWarnings
+    ;
   inherit (self.ron)
     fromRON
     importRON
@@ -43,10 +51,12 @@ makeExtensible (self: {
       ]
       (
         name:
-        warn
-          "cosmic-manager: `cosmicLib.cosmic.generators.${name}` has been renamed to `cosmicLib.cosmic.ron.${name}`."
+        self.mkWarning "lib"
+          "`cosmicLib.cosmic.generators.${name}` has been renamed to `cosmicLib.cosmic.ron.${name}`."
           self.ron.${name}
       );
 
-  mkRon = warn "cosmic-manager: `cosmicLib.cosmic.mkRon` has been renamed to `cosmicLib.cosmic.mkRON`" self.ron.mkRON;
+  mkRon =
+    self.mkWarning "lib" "`cosmicLib.cosmic.mkRon` has been renamed to `cosmicLib.cosmic.mkRON`"
+      self.ron.mkRON;
 })

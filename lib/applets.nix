@@ -1,4 +1,24 @@
 { lib, ... }:
+let
+  inherit (builtins) attrValues filter length;
+  inherit (lib)
+    getAttrFromPath
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkPackageOption
+    optionalAttrs
+    optionals
+    pipe
+    setAttrByPath
+    ;
+  inherit (lib.cosmic)
+    applyExtraConfig
+    mkAssertion
+    mkAssertions
+    mkSettingsOption
+    ;
+in
 {
   mkCosmicApplet =
     {
@@ -35,20 +55,20 @@
           ...
         }:
         let
-          cfg = lib.getAttrFromPath loc config;
-          opts = lib.getAttrFromPath loc options;
+          cfg = getAttrFromPath loc config;
+          opts = getAttrFromPath loc options;
         in
         {
-          options = lib.setAttrByPath loc (
-            lib.optionalAttrs (!isBuiltin) {
-              enable = lib.mkEnableOption "${originalName} applet";
-              package = lib.mkPackageOption pkgs package {
+          options = setAttrByPath loc (
+            optionalAttrs (!isBuiltin) {
+              enable = mkEnableOption "${originalName} applet";
+              package = mkPackageOption pkgs package {
                 extraDescription = "Set to `null` if you don't want to install the package.";
                 nullable = true;
               };
             }
-            // lib.optionalAttrs hasSettings {
-              settings = lib.cosmic.options.mkSettingsOption {
+            // optionalAttrs hasSettings {
+              settings = mkSettingsOption {
                 description = settingsDescription;
                 example = settingsExample;
                 options = settingsOptions;
@@ -60,52 +80,49 @@
           config =
             let
               anySettingsSet =
-                (lib.pipe cfg.settings [
-                  builtins.attrValues
-                  (builtins.filter (x: x != null))
-                  builtins.length
+                (pipe cfg.settings [
+                  attrValues
+                  (filter (x: x != null))
+                  length
                 ]) > 0;
+
               enabled = if isBuiltin then anySettingsSet else cfg.enable;
             in
-            assert lib.assertMsg (
+            assert mkAssertion name (
               isBuiltin -> hasSettings
             ) "Applet module must have settings if it is a built-in applet.";
-            lib.mkIf enabled (
-              lib.mkMerge [
-                {
-                  assertions = [
-                    {
-                      assertion = enabled -> config.wayland.desktopManager.cosmic.enable;
-                      message = "COSMIC Desktop declarative configuration must be enabled to use ${originalName} applet module.";
-                    }
-                  ];
-                }
-
-                (lib.mkIf (!isBuiltin) {
-                  home.packages = lib.optionals (cfg.package != null) [ cfg.package ];
-                })
-
-                (lib.mkIf hasSettings {
-                  wayland.desktopManager.cosmic = {
-                    configFile.${identifier} = {
-                      entries = cfg.settings;
-                      version = configurationVersion;
-                    };
-                  };
-                })
-
-                (lib.mkIf (args ? extraConfig) (
-                  lib.cosmic.modules.applyExtraConfig {
-                    inherit
-                      cfg
-                      enabled
-                      extraConfig
-                      opts
-                      ;
+            mkIf enabled (mkMerge [
+              {
+                assertions = mkAssertions name [
+                  {
+                    assertion = enabled -> config.wayland.desktopManager.cosmic.enable;
+                    message = "COSMIC Desktop declarative configuration must be enabled to use ${originalName} applet module.";
                   }
-                ))
-              ]
-            );
+                ];
+              }
+
+              (mkIf (!isBuiltin) {
+                home.packages = optionals (cfg.package != null) [ cfg.package ];
+              })
+
+              (mkIf hasSettings {
+                wayland.desktopManager.cosmic = {
+                  configFile.${identifier} = {
+                    entries = cfg.settings;
+                    version = configurationVersion;
+                  };
+                };
+              })
+
+              (mkIf (args ? extraConfig) (applyExtraConfig {
+                inherit
+                  cfg
+                  enabled
+                  extraConfig
+                  opts
+                  ;
+              }))
+            ]);
 
           meta = {
             inherit maintainers;
