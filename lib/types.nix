@@ -38,6 +38,7 @@ let
     unique
     warn
     ;
+  inherit (lib.cosmic) mkRONExpression;
   inherit (lib.options) mergeEqualOption showDefs;
 
   rawRon = mkOptionType {
@@ -81,13 +82,13 @@ in
 
       entries = mkOption {
         type = with types; attrsOf anything;
-        example = {
+        example = mkRONExpression 0 {
           autotile = true;
           autotile_behavior = {
             __type = "enum";
             variant = "PerWorkspace";
           };
-        };
+        } null;
         description = ''
           Configuration entries for the component.
         '';

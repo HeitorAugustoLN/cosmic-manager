@@ -1,5 +1,9 @@
 { lib, ... }:
-lib.cosmic.applets.mkCosmicApplet {
+let
+  inherit (lib) mkOption types;
+  inherit (lib.cosmic) defaultNullOpts mkCosmicApplet mkRONExpression;
+in
+mkCosmicApplet {
   name = "panel-button";
   identifier = "com.system76.CosmicPanelButton";
   configurationVersion = 1;
@@ -7,73 +11,69 @@ lib.cosmic.applets.mkCosmicApplet {
 
   maintainers = [ lib.maintainers.HeitorAugustoLN ];
 
-  settingsOptions =
-    let
-      inherit (lib.cosmic) defaultNullOpts;
-    in
-    {
-      configs =
-        let
-          configsSubmodule = lib.types.submodule {
-            freeformType = with lib.types; attrsOf anything;
-            options.force_presentation = lib.mkOption {
-              type =
-                with lib.types;
-                maybeRonRaw (
-                  ronOptionalOf (
-                    maybeRonRaw (ronEnum [
-                      "Icon"
-                      "Text"
-                    ])
-                  )
-                );
-              example = {
-                __type = "optional";
-                value = {
-                  __type = "enum";
-                  variant = "Icon";
+  settingsOptions = {
+    configs =
+      let
+        configsSubmodule = types.submodule {
+          freeformType = with types; attrsOf anything;
+          options.force_presentation = mkOption {
+            type =
+              with types;
+              maybeRonRaw (
+                ronOptionalOf (
+                  maybeRonRaw (ronEnum [
+                    "Icon"
+                    "Text"
+                  ])
+                )
+              );
+            example = mkRONExpression 0 {
+              __type = "optional";
+              value = {
+                __type = "enum";
+                variant = "Icon";
+              };
+            } null;
+            description = ''
+              Force the presentation of the buttons on the panel.
+            '';
+          };
+        };
+      in
+      defaultNullOpts.mkNullable (types.ronMapOf configsSubmodule)
+        {
+          __type = "map";
+          value = [
+            {
+              key = "Panel";
+              value = {
+                force_presentation = {
+                  __type = "optional";
+                  value = {
+                    __type = "enum";
+                    variant = "Icon";
+                  };
                 };
               };
-              description = ''
-                Force the presentation of the buttons on the panel.
-              '';
-            };
-          };
-        in
-        defaultNullOpts.mkNullable (lib.types.ronMapOf configsSubmodule)
-          {
-            __type = "map";
-            value = [
-              {
-                key = "Panel";
-                value = {
-                  force_presentation = {
-                    __type = "optional";
-                    value = {
-                      __type = "enum";
-                      variant = "Icon";
-                    };
+            }
+            {
+              key = "Dock";
+              value = {
+                force_presentation = {
+                  __type = "optional";
+                  value = {
+                    __type = "enum";
+                    variant = "Text";
                   };
                 };
-              }
-              {
-                key = "Dock";
-                value = {
-                  force_presentation = {
-                    __type = "optional";
-                    value = {
-                      __type = "enum";
-                      variant = "Text";
-                    };
-                  };
-                };
-              }
-            ];
-          }
-          ''
-            Configurations for the panel buttons.
-          '';
-    };
+              };
+            }
+          ];
+        }
+        ''
+          Configurations for the panel buttons.
+        '';
+  };
 
   settingsExample = {
     configs = {
