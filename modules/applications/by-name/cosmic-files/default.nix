@@ -99,6 +99,13 @@ lib.cosmic.applications.mkCosmicApplication {
               __type = "enum";
               variant = "Videos";
             }
+            {
+              __type = "enum";
+              variant = "Path";
+              value = [
+                "/home/user/Projects"
+              ];
+            }
           ]
           ''
             The list of favorite folders.
@@ -247,6 +254,13 @@ lib.cosmic.applications.mkCosmicApplication {
       {
         __type = "enum";
         variant = "Videos";
+      }
+      {
+        __type = "enum";
+        variant = "Path";
+        value = [
+          "/home/user/Projects"
+        ];
       }
     ];
 
