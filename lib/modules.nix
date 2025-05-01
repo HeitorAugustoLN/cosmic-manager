@@ -70,7 +70,7 @@ in
     scope: warnings:
     let
       prefix = messagePrefix scope;
-      process = warning: [ "${prefix} ${trim warning}" ];
+      process = warning: "${prefix} ${trim warning}";
     in
     map process warnings;
 }

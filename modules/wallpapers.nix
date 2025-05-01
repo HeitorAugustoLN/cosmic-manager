@@ -9,18 +9,22 @@ let
     listToAttrs
     ;
   inherit (lib)
+    flatten
     mkIf
     mkMerge
     mkOption
+    optionals
     pipe
     types
     unique
     ;
   inherit (lib.cosmic)
     defaultNullOpts
+    importRON
     mkAssertions
     mkRONExpression
     mkWarning
+    mkWarnings
     ;
 in
 {
@@ -261,6 +265,14 @@ in
           length
         ] > 0;
 
+      availableOutputs = pipe (importRON "${config.xdg.stateHome}/cosmic-comp/outputs.ron").config.value [
+        (map (entry: entry.key))
+        flatten
+        (filter (item: item ? connector))
+        (filter (item: item ? make -> item.make != "COSMIC"))
+        (map (item: item.connector))
+      ];
+
       outputs = map (wallpaper: wallpaper.output) cfg.wallpapers;
     in
     mkIf (cfg.wallpapers != null) (mkMerge [
@@ -268,12 +280,12 @@ in
         assertions = mkAssertions "wallpapers" [
           {
             assertion = hasAllWallpaper -> length cfg.wallpapers == 1;
-            message = "Only one wallpaper can be set if the output is set to 'all'.";
+            message = "When using output = 'all', exactly one wallpaper must be configured. Multiple wallpapers cannot be used with the 'all' setting.";
           }
 
           {
             assertion = length outputs == length (unique outputs);
-            message = "Each output can only have one wallpaper configuration.";
+            message = "Duplicate display outputs detected in wallpaper configuration. Each display can only have one wallpaper assigned.";
           }
         ];
 
@@ -300,7 +312,29 @@ in
         };
       }
 
+      (mkIf hasAllWallpaper {
+        wayland.desktopManager.cosmic.stateFile."com.system76.CosmicBackground" = {
+          entries.wallpapers = map (output: {
+            __type = "tuple";
+            value = [
+              output
+              ((head cfg.wallpapers).source)
+            ];
+          }) availableOutputs;
+
+          inherit version;
+        };
+      })
+
       (mkIf (!hasAllWallpaper) {
+        warnings = optionals (availableOutputs != outputs) (
+          mkWarnings "wallpapers" [
+            ''
+              Some available display outputs are missing wallpaper configurations.
+              These displays will use the system default background instead of your configured wallpapers.''
+          ]
+        );
+
         wayland.desktopManager.cosmic.stateFile."com.system76.CosmicBackground" = {
           entries.wallpapers = map (wallpaper: {
             __type = "tuple";
