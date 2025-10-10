@@ -196,14 +196,6 @@ in
               description = ''
                 The source of the wallpaper.
               '';
-              # TODO: Remove support for strings after COSMIC stable release
-              apply =
-                value:
-                if any isString value.value then
-                  mkWarning "wallpapers" "strings as path values is deprecated, please use a path value instead."
-                    value
-                else
-                  value;
             };
         };
       };
