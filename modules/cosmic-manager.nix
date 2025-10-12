@@ -15,7 +15,7 @@
 
   options.programs.cosmic-manager = {
     enable = lib.mkEnableOption "" // {
-      default = config.wayland.desktopManager.cosmic.enable;
+      default = false;
       defaultText = lib.literalMD "`config.wayland.desktopManager.cosmic.enable`";
       description = ''
         Whether to enable `cosmic-manager` command-line interface.

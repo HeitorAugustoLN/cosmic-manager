@@ -1387,7 +1387,7 @@
         lib.mkIf needsBuild (
           lib.hm.dag.entryAfter [
             "configureCosmic"
-          ] "run ${lib.getExe config.programs.cosmic-manager.package} build-theme"
+          ] "run ${lib.getExe config.programs.cosmic-ext-ctl.package} build-theme"
         );
 
       wayland.desktopManager.cosmic.configFile = lib.mkMerge [
