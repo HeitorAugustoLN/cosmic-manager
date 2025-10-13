@@ -1,3 +1,4 @@
+{ config, ... }:
 {
   perSystem =
     { pkgs, ... }:
@@ -26,9 +27,8 @@
 
           meta = {
             description = "Generate JSON with all enum actions from COSMIC settings daemon";
-            homepage = "https://github.com/HeitorAugustoLN/cosmic-manager";
-            license = lib.licenses.mit;
-            maintainers = [ lib.maintainers.HeitorAugustoLN ];
+            homepage = config.nexus.meta.repo.url;
+            inherit (config.nexus.meta.repo) license maintainers;
             platforms = lib.platforms.all;
           };
         };
