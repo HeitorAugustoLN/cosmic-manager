@@ -16,6 +16,7 @@
 
         rustfmt.enable = true;
         statix.enable = true;
+        taplo.enable = true;
       };
     };
 }

@@ -50,12 +50,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let json_string = serde_json::to_string_pretty(&output)?;
 
-    // Create data directory if it doesn't exist
     if let Some(parent) = Path::new(OUTPUT_FILE).parent() {
         fs::create_dir_all(parent)?;
     }
 
-    // Write to file
     fs::write(OUTPUT_FILE, &json_string)?;
     eprintln!("JSON written to {}", OUTPUT_FILE);
 
