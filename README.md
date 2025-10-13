@@ -18,7 +18,6 @@ Once you're done, you can take a look at all of our available options in the [Op
 
 If you found a bug, please open an issue on the [issue tracker](https://github.com/HeitorAugustoLN/cosmic-manager/issues/new).
 
-## Licenses
+## License
 
-- [GPL-3.0-only](./LICENSE-GPL): Applies to the `cosmic-manager` command-line interface located in the `cosmic-manager` subdirectory.
-- [MIT](./LICENSE-MIT): Covers Nix packages, `home-manager` modules, `cosmic-manager` library, documentation, and basically everything else.
+- [MIT](./LICENSE)

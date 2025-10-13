@@ -1,84 +1,40 @@
 {
   description = "Manage COSMIC desktop declaratively using home-manager";
 
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+
   inputs = {
     flake-parts = {
-      url = "github:hercules-ci/flake-parts";
+      type = "github";
+      owner = "hercules-ci";
+      repo = "flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager";
+      type = "github";
+      owner = "nix-community";
+      repo = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  };
-
-  outputs =
-    inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "aarch64-linux"
-        "i686-linux"
-        "x86_64-linux"
-      ];
-
-      flake.homeManagerModules = {
-        default = inputs.self.homeManagerModules.cosmic-manager;
-        cosmic-manager = ./modules;
-      };
-
-      perSystem =
-        { pkgs, self', ... }:
-        let
-          version = inputs.self.shortRev or inputs.self.dirtyShortRev or "unknown";
-
-          mkOptionsDoc = pkgs.callPackage ./docs/options.nix { };
-          mkSite = pkgs.callPackage ./docs/generate-website.nix { };
-        in
-        {
-          checks = pkgs.callPackages ./tests { };
-
-          devShells.default = import ./shell.nix {
-            inherit pkgs;
-            inherit (self'.packages) cosmic-manager;
-          };
-
-          formatter = pkgs.treefmt;
-
-          packages = {
-            default = self'.packages.cosmic-manager;
-
-            cosmic-manager = pkgs.callPackage ./cosmic-manager { };
-
-            home-manager-options = mkOptionsDoc {
-              inherit version;
-              moduleRoot = ./modules;
-            };
-
-            site =
-              let
-                src =
-                  let
-                    inherit (pkgs) lib;
-                  in
-                  lib.fileset.toSource {
-                    root = ./.;
-                    fileset = lib.fileset.unions [
-                      ./docs/book.toml
-                      ./docs/src
-                    ];
-                  };
-              in
-              mkSite {
-                pname = "cosmic-manager-website";
-                inherit version src;
-
-                sourceRoot = "${src.name}/docs";
-                options = self'.packages.home-manager-options;
-              };
-          };
-        };
+    import-tree = {
+      type = "github";
+      owner = "vic";
+      repo = "import-tree";
     };
+
+    nixpkgs = {
+      type = "github";
+      owner = "HeitorAugustoLN";
+      repo = "nixpkgs";
+      ref = "patched";
+    };
+
+    systems = {
+      type = "github";
+      owner = "nix-systems";
+      repo = "default-linux";
+    };
+  };
 }
