@@ -1,5 +1,3 @@
-**/debug/
-**/target/
-**/*.rs.bk
 result*
 .direnv/
+.pre-commit-config.yaml

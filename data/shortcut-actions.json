@@ -1,0 +1,527 @@
+{
+  "enums": [
+    {
+      "name": "Action",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Close"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Debug"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Disable"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "FocusDirection"
+          ],
+          "name": "Focus"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "LastWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Maximize"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Fullscreen"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "MigrateWorkspaceToNextOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Direction"
+          ],
+          "name": "MigrateWorkspaceToOutput"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "MigrateWorkspaceToPreviousOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Minimize"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Direction"
+          ],
+          "name": "Move"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "MoveToLastWorkspace"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "MoveToNextOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "MoveToNextWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Direction"
+          ],
+          "name": "MoveToOutput"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "MoveToPreviousOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "MoveToPreviousWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "u8"
+          ],
+          "name": "MoveToWorkspace"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "NextOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "NextWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Orientation"
+          ],
+          "name": "Orientation"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "PreviousOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "PreviousWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "ResizeDirection"
+          ],
+          "name": "Resizing"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "SendToLastWorkspace"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "SendToNextOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "SendToNextWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Direction"
+          ],
+          "name": "SendToOutput"
+        },
+        {
+          "deprecated": true,
+          "fields": null,
+          "name": "SendToPreviousOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "SendToPreviousWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "u8"
+          ],
+          "name": "SendToWorkspace"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "SwapWindow"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "Direction"
+          ],
+          "name": "SwitchOutput"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "System"
+          ],
+          "name": "System"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "String"
+          ],
+          "name": "Spawn"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Terminate"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ToggleOrientation"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ToggleStacking"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ToggleSticky"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ToggleTiling"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ToggleWindowFloating"
+        },
+        {
+          "deprecated": false,
+          "fields": [
+            "u8"
+          ],
+          "name": "Workspace"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ZoomIn"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "ZoomOut"
+        }
+      ]
+    },
+    {
+      "name": "System",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "AppLibrary"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "BrightnessDown"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "BrightnessUp"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "HomeFolder"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "InputSourceSwitch"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "KeyboardBrightnessDown"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "KeyboardBrightnessUp"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Launcher"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "LockScreen"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "LogOut"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Mute"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "MuteMic"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "PlayPause"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "PlayNext"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "PlayPrev"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "PowerOff"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Screenshot"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Terminal"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "TouchpadToggle"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "VolumeLower"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "VolumeRaise"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "WebBrowser"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "WindowSwitcher"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "WindowSwitcherPrevious"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "WorkspaceOverview"
+        }
+      ]
+    },
+    {
+      "name": "Direction",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Left"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Right"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Up"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Down"
+        }
+      ]
+    },
+    {
+      "name": "FocusDirection",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Left"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Right"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Up"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Down"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "In"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Out"
+        }
+      ]
+    },
+    {
+      "name": "ResizeDirection",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Inwards"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Outwards"
+        }
+      ]
+    },
+    {
+      "name": "ResizeEdge",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Bottom"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "BottomLeft"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "BottomRight"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Left"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Right"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Top"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "TopLeft"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "TopRight"
+        }
+      ]
+    },
+    {
+      "name": "Orientation",
+      "variants": [
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Horizontal"
+        },
+        {
+          "deprecated": false,
+          "fields": null,
+          "name": "Vertical"
+        }
+      ]
+    }
+  ],
+  "source_url": "https://raw.githubusercontent.com/pop-os/cosmic-settings-daemon/epoch-1.0.0-beta.1.1/config/src/shortcuts/action.rs",
+  "tag": "epoch-1.0.0-beta.1.1"
+}
