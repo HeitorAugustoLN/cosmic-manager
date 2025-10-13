@@ -13,8 +13,10 @@
 
     home-manager = {
       type = "github";
-      owner = "nix-community";
+      # owner = "nix-community";
+      owner = "HeitorAugustoLN";
       repo = "home-manager";
+      ref = "cosmic-upstreaming";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
