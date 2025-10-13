@@ -1,7 +1,7 @@
 {
   description = "Manage COSMIC desktop declaratively using home-manager";
 
-  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
+  outputs = inputs: inputs.flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./flake);
 
   inputs = {
     flake-parts = {
