@@ -20,6 +20,9 @@
       "name": "Maximize"
     },
     {
+      "name": "Fullscreen"
+    },
+    {
       "name": "MigrateWorkspaceToNextOutput"
     },
     {
@@ -180,7 +183,13 @@
         "name": "BrightnessUp"
       },
       {
+        "name": "DisplayToggle"
+      },
+      {
         "name": "HomeFolder"
+      },
+      {
+        "name": "InputSourceSwitch"
       },
       {
         "name": "KeyboardBrightnessDown"
@@ -213,10 +222,16 @@
         "name": "PlayPrev"
       },
       {
+        "name": "PowerOff"
+      },
+      {
         "name": "Screenshot"
       },
       {
         "name": "Terminal"
+      },
+      {
+        "name": "TouchpadToggle"
       },
       {
         "name": "VolumeLower"
