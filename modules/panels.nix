@@ -1,4 +1,9 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   options.wayland.desktopManager.cosmic.panels =
     let
@@ -265,11 +270,11 @@
           };
         }) cfg.panels)
       );
-    };
 
-  restartCosmicPanel = lib.mkIf (cfg.panels != null) (
-    lib.hm.dag.entryAfter [
-      "configureCosmic"
-    ] "run ${lib.getExe pkgs.killall} .cosmic-panel-wrapped || true"
-  );
+      home.activation.restartCosmicPanel = lib.mkIf (cfg.panels != null) (
+        lib.hm.dag.entryAfter [
+          "configureCosmic"
+        ] "run ${lib.getExe pkgs.killall} .cosmic-panel-wrapped || true"
+      );
+    };
 }
