@@ -266,4 +266,10 @@
         }) cfg.panels)
       );
     };
+
+  restartCosmicPanel = lib.mkIf (cfg.panels != null) (
+    lib.hm.dag.entryAfter [
+      "configureCosmic"
+    ] "run ${lib.getExe pkgs.killall} .cosmic-panel-wrapped || true"
+  );
 }

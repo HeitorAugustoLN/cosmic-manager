@@ -1,10 +1,8 @@
 { config, lib, ... }:
 let
   inherit (builtins)
-    any
     filter
     head
-    isString
     length
     listToAttrs
     ;
@@ -20,7 +18,6 @@ let
     defaultNullOpts
     mkAssertions
     mkRONExpression
-    mkWarning
     ;
 in
 {
