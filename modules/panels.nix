@@ -107,6 +107,14 @@
             '';
           };
 
+          margin = lib.mkOption {
+            type = with lib.types; maybeRonRaw ints.u32;
+            example = 4;
+            description = ''
+              The margin between the panel and anchored edge. Needs to have a value for anchor_gap to take effect.
+            '';
+          };
+
           opacity = defaultNullOpts.mkNullableWithRaw (lib.types.numbers.between 0.0 1.0) 1.0 ''
             The opacity of the panel.
           '';
@@ -203,6 +211,7 @@
           };
           expand_to_edges = true;
           name = "Panel";
+          margin = 4;
           opacity = 1.0;
           output = {
             __type = "enum";
