@@ -112,6 +112,7 @@
             example = 4;
             description = ''
               The margin between the panel and anchored edge. Needs to have a value for anchor_gap to take effect.
+              If anchor_gap is false, then set this to 0.
             '';
           };
 
