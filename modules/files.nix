@@ -257,7 +257,6 @@ in
       };
 
       json = (pkgs.formats.json { }).generate "configurations.json" configurations;
-      test_json = builtins.trace json json;
     in
     {
       assertions = mkAssertions "files" [
