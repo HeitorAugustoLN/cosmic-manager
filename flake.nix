@@ -57,6 +57,13 @@
               moduleRoot = ./modules;
             };
 
+            gen-local-options = pkgs.writeShellApplication {
+              name = "gen-local-options";
+              text = ''
+                root="$(git rev-parse --show-toplevel)"
+                cp ${self'.packages.home-manager-options} "$root/docs/src/options/README.md"
+              '';
+            };
             site =
               let
                 src =
