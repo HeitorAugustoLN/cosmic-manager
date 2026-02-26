@@ -1204,6 +1204,11 @@
             The default theme to use for COSMIC desktop and applications.
           '';
 
+          auto_switch = defaultNullOpts.mkBool false ''
+            Whether to automatically switch between dark and light themes
+            based on sunrise and sunset using geoclue2.
+          '';
+
           light = defaultNullOpts.mkNullable themeSubmodule { active_hint = 3; } ''
             The light theme to build for COSMIC desktop and applications.
           '';
@@ -1405,9 +1410,15 @@
           };
         })
 
-        (lib.mkIf (cfg.appearance.theme.mode != null) {
+        (lib.mkIf (cfg.appearance.theme.mode != null || cfg.appearance.theme.auto_switch != null) {
           "com.system76.CosmicTheme.Mode" = {
-            entries.is_dark = cfg.appearance.theme.mode == "dark";
+            entries =
+              lib.optionalAttrs (cfg.appearance.theme.mode != null) {
+                is_dark = cfg.appearance.theme.mode == "dark";
+              }
+              // lib.optionalAttrs (cfg.appearance.theme.auto_switch != null) {
+                auto_switch = cfg.appearance.theme.auto_switch;
+              };
             inherit version;
           };
         })
