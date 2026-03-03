@@ -407,9 +407,13 @@ in
               Whether the cursor should follow the focused window.
             '';
 
-            descale_xwayland = defaultNullOpts.mkBool false ''
-              Whether to let XWayland windows be scaled by themselves.
-            '';
+            descale_xwayland = mkOption {
+              type = with types; maybeRonRaw (either (ronEnum [ "fractional" ]) bool);
+              default = false;
+              description = ''
+                Whether to let XWayland windows be scaled by themselves.
+              '';
+            };
 
             edge_snap_threshold = defaultNullOpts.mkU32 0 ''
               The edge snap threshold.
