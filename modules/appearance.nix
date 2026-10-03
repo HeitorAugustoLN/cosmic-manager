@@ -308,12 +308,6 @@
                       Window gaps size (outer and inner, respectively) for COSMIC compositor.
                     '';
 
-                is_frosted = defaultNullOpts.mkBool false ''
-                  Whether to enable blurred transparency for COSMIC compositor.
-
-                  NOTE: This option doesn't work for COSMIC yet.
-                '';
-
                 neutral_tint =
                   defaultNullOpts.mkNullable (lib.types.ronOptionalOf srgbType)
                     {
@@ -1374,6 +1368,7 @@
     let
       cfg = config.wayland.desktopManager.cosmic;
       version = 1;
+      themeVersion = 2;
     in
     {
       home.activation.buildCosmicTheme =
@@ -1394,14 +1389,14 @@
         (lib.mkIf (cfg.appearance.theme.dark != null) {
           "com.system76.CosmicTheme.Dark.Builder" = {
             entries = cfg.appearance.theme.dark;
-            inherit version;
+            version = themeVersion;
           };
         })
 
         (lib.mkIf (cfg.appearance.theme.light != null) {
           "com.system76.CosmicTheme.Light.Builder" = {
             entries = cfg.appearance.theme.light;
-            inherit version;
+            version = themeVersion;
           };
         })
 
