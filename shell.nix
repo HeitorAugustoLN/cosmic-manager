@@ -26,5 +26,6 @@ pkgs.mkShell {
       rustfmt
       statix-fix
       taplo
+      mdbook
     ];
 }

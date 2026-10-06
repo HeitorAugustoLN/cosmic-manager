@@ -3,3 +3,5 @@
 **/*.rs.bk
 result*
 .direnv/
+docs/src/options/README.md
+docs/book
