@@ -40,16 +40,11 @@
         {
           checks = pkgs.callPackages ./tests { };
 
-          devShells.default = import ./shell.nix {
-            inherit pkgs;
-            inherit (self'.packages) cosmic-manager;
-          };
+          devShells.default = import ./shell.nix { inherit pkgs; };
 
           formatter = pkgs.treefmt;
 
           packages = {
-            default = self'.packages.cosmic-manager;
-
             home-manager-options = mkOptionsDoc {
               inherit version;
               moduleRoot = ./modules;
