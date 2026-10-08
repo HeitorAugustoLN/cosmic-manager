@@ -10,5 +10,6 @@ let
 in
 {
   from-ron = callTest ./from-ron.nix { };
+  shortcuts = callTest ./shortcuts.nix { };
   to-ron = callTest ./to-ron.nix { };
 }

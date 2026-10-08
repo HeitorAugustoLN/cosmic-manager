@@ -23,7 +23,12 @@ let
     types
     unique
     ;
-  inherit (lib.cosmic) cleanNullsExceptOptional defaultNullOpts mkRONExpression;
+  inherit (lib.cosmic)
+    cleanNullsExceptOptional
+    defaultNullOpts
+    mkAssertions
+    mkRONExpression
+    ;
   inherit (lib.types) rustToNixType;
 in
 {
@@ -216,8 +221,29 @@ in
             variant = modifier;
           }) (unique (if all isModifier parts then parts else init parts));
         };
+
+      canonicalShortcutKey = shortcut:
+        let
+          parsed = parseShortcuts shortcut.key;
+          modifiers = builtins.sort (a: b: a < b) (map (modifier: modifier.variant) parsed.modifiers);
+        in
+        builtins.concatStringsSep "+" ([ (if parsed.key == null then "" else parsed.key) ] ++ modifiers);
+
+      shortcutKeys = map canonicalShortcutKey cfg.shortcuts;
+      duplicateShortcutKeys = filter (
+        key: builtins.length (filter (candidate: candidate == key) shortcutKeys) > 1
+      ) (unique shortcutKeys);
     in
     mkIf (cfg.shortcuts != null) {
+      assertions = mkAssertions "shortcuts" [
+        {
+          assertion = duplicateShortcutKeys == [ ];
+          message = "Each shortcut key combination can only be configured once. Conflicting key: ${
+            builtins.concatStringsSep ", " duplicateShortcutKeys
+          }.";
+        }
+      ];
+
       wayland.desktopManager.cosmic.configFile."com.system76.CosmicSettings.Shortcuts" = {
         entries.custom = {
           __type = "map";
